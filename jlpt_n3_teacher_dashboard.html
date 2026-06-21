@@ -3,20 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎓 Dashboard Giáo Viên - JLPT N3</title>
+<title>Dashboard Giao Vien - JLPT N3</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',sans-serif;background:#0f0f1e;color:#e0e0e0;min-height:100vh}
-.header{background:linear-gradient(135deg,#1a1a3e,#2d1b4e);padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,145,164,0.2)}
+body{font-family:"Segoe UI",sans-serif;background:#0f0f1e;color:#e0e0e0;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a1a3e,#2d1b4e);padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,145,164,0.2);flex-wrap:wrap;gap:1rem}
 .header h1{color:#ff91a4;font-size:1.5rem}
 .header p{color:#aaa;font-size:0.85rem;margin-top:0.2rem}
-.login-form{display:flex;gap:1rem;align-items:center}
+.login-form{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
 .login-form input{background:rgba(255,255,255,0.08);border:1px solid rgba(255,145,164,0.4);color:#fff;padding:0.5rem 1rem;border-radius:8px;outline:none;font-size:0.9rem}
-.btn{background:linear-gradient(135deg,#ff6b8a,#c0392b);border:none;color:#fff;padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.9rem;transition:opacity 0.2s}
-.btn:hover{opacity:0.85}
+.btn{background:linear-gradient(135deg,#ff6b8a,#c0392b);border:none;color:#fff;padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.9rem}
 .btn-sm{padding:0.3rem 0.8rem;font-size:0.8rem;background:rgba(255,107,138,0.3);border:1px solid #ff6b8a}
-
 .dashboard{display:none;padding:1.5rem 2rem}
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem}
 .stat-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,145,164,0.2);border-radius:14px;padding:1.2rem;text-align:center}
@@ -25,13 +23,10 @@ body{font-family:'Segoe UI',sans-serif;background:#0f0f1e;color:#e0e0e0;min-heig
 .stat-card.green .val{color:#2ecc71}
 .stat-card.red .val{color:#e74c3c}
 .stat-card.yellow .val{color:#f1c40f}
-
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem}
 @media(max-width:900px){.grid-2{grid-template-columns:1fr}}
 .panel{background:rgba(255,255,255,0.04);border:1px solid rgba(255,145,164,0.15);border-radius:16px;padding:1.5rem}
-.panel h3{font-size:1rem;color:#ff91a4;margin-bottom:1.2rem;display:flex;align-items:center;gap:0.5rem}
-.panel canvas{max-height:300px}
-
+.panel h3{font-size:1rem;color:#ff91a4;margin-bottom:1.2rem}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:0.85rem}
 th{background:rgba(255,145,164,0.1);color:#ff91a4;padding:0.6rem 0.8rem;text-align:left;border-bottom:1px solid rgba(255,145,164,0.2)}
@@ -41,520 +36,433 @@ tr:hover td{background:rgba(255,145,164,0.05)}
 .badge.pass{background:rgba(46,204,113,0.2);color:#2ecc71;border:1px solid #27ae60}
 .badge.fail{background:rgba(231,76,60,0.2);color:#e74c3c;border:1px solid #c0392b}
 .badge.blue{background:rgba(52,152,219,0.2);color:#3498db;border:1px solid #2980b9}
-
-.wrong-item{display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.06)}
-.wrong-item:last-child{border-bottom:none}
+.wrong-item{display:flex;justify-content:space-between;align-items:center;padding:0.75rem;border-radius:10px;margin-bottom:0.5rem;cursor:pointer;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);transition:all 0.2s}
+.wrong-item:hover{background:rgba(255,145,164,0.1);border-color:rgba(255,145,164,0.4);transform:translateX(4px)}
 .wrong-bar{height:6px;background:rgba(255,255,255,0.1);border-radius:3px;margin-top:4px;overflow:hidden}
 .wrong-fill{height:100%;background:linear-gradient(90deg,#c0392b,#e74c3c);border-radius:3px}
-
 .realtime-dot{width:8px;height:8px;border-radius:50%;background:#2ecc71;display:inline-block;animation:blink 1s infinite alternate}
 @keyframes blink{from{opacity:1}to{opacity:0.3}}
-
 .tab-bar{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
 .tab{background:rgba(255,255,255,0.05);border:1px solid rgba(255,145,164,0.2);color:#aaa;padding:0.5rem 1.2rem;border-radius:20px;cursor:pointer;font-size:0.85rem;transition:all 0.2s}
 .tab.active{background:rgba(255,107,138,0.3);border-color:#ff91a4;color:#fff}
-
 .filter-bar{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center}
 .filter-bar select{background:rgba(255,255,255,0.08);border:1px solid rgba(255,145,164,0.3);color:#fff;padding:0.4rem 0.8rem;border-radius:8px;font-size:0.85rem;outline:none}
 .filter-bar label{color:#aaa;font-size:0.85rem}
-
 .no-data{text-align:center;color:#aaa;padding:3rem;font-size:0.9rem}
 .refresh-info{color:#aaa;font-size:0.78rem;margin-left:0.5rem}
-
-.progress-ring{position:relative;display:inline-flex;align-items:center;justify-content:center}
 .speed-meter{background:rgba(255,255,255,0.04);border:1px solid rgba(255,145,164,0.15);border-radius:12px;padding:0.8rem 1rem;display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem}
-.speed-name{font-size:0.85rem;color:#ddd;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
-.speed-progress{flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden}
-.speed-fill{height:100%;border-radius:3px;transition:width 0.5s}
-.speed-stat{font-size:0.78rem;color:#ff91a4;min-width:50px;text-align:right}
-
 .live-badge{background:#c0392b;color:#fff;font-size:0.7rem;padding:0.15rem 0.5rem;border-radius:10px;animation:pulse-red 1s infinite alternate}
 @keyframes pulse-red{from{opacity:1}to{opacity:0.5}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-box{background:#1a1a35;border:1px solid rgba(255,145,164,0.4);border-radius:20px;padding:2rem;max-width:700px;width:100%;max-height:90vh;overflow-y:auto;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem}
+.modal-header h3{color:#ff91a4;font-size:1.1rem;line-height:1.4;flex:1}
+.modal-close{background:none;border:none;color:#aaa;font-size:1.5rem;cursor:pointer;margin-left:1rem}
+.modal-close:hover{color:#fff}
+.modal-stats{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.modal-stat{background:rgba(255,255,255,0.05);border-radius:10px;padding:0.6rem 1rem;text-align:center;flex:1;min-width:80px}
+.modal-stat .v{font-size:1.4rem;font-weight:700;color:#e74c3c}
+.modal-stat .v.ok{color:#2ecc71}
+.modal-stat .l{font-size:0.72rem;color:#aaa;margin-top:2px}
+.type-badge{display:inline-block;background:rgba(52,152,219,0.2);border:1px solid #3498db;color:#3498db;font-size:0.72rem;padding:0.2rem 0.6rem;border-radius:10px;margin-bottom:0.8rem}
+.q-text{background:rgba(255,255,255,0.04);border-left:3px solid #ff6b8a;border-radius:0 10px 10px 0;padding:1rem 1.2rem;margin-bottom:1.2rem;font-size:1rem;line-height:1.7;color:#f0f0f0}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:1.5rem}
+@media(max-width:500px){.opts-grid{grid-template-columns:1fr}}
+.opt-row{padding:0.7rem 1rem;border-radius:10px;border:1px solid rgba(255,255,255,0.1);font-size:0.9rem;display:flex;align-items:center;gap:0.6rem}
+.opt-row.correct{background:rgba(39,174,96,0.2);border-color:#27ae60;color:#2ecc71}
+.opt-row.neutral{background:rgba(255,255,255,0.03);color:#aaa}
+.explain-box{background:rgba(255,215,0,0.07);border:1px solid rgba(255,215,0,0.3);border-radius:12px;padding:1.2rem;margin-bottom:1.2rem}
+.explain-box h4{color:#ffd700;font-size:0.9rem;margin-bottom:0.6rem}
+.explain-box p{color:#ddd;font-size:0.88rem;line-height:1.7}
+.who-wrong-box{background:rgba(231,76,60,0.07);border:1px solid rgba(231,76,60,0.3);border-radius:12px;padding:1.2rem;margin-bottom:1.2rem}
+.who-wrong-box h4{color:#e74c3c;font-size:0.9rem;margin-bottom:0.8rem}
+.student-row{padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.83rem;color:#ccc}
+.student-row:last-child{border-bottom:none}
+.modal-nav{display:flex;gap:0.8rem;justify-content:flex-end;margin-top:1rem}
+.modal-nav button{background:rgba(255,255,255,0.07);border:1px solid rgba(255,145,164,0.3);color:#ff91a4;padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.85rem}
+.modal-nav button:hover{background:rgba(255,145,164,0.2)}
+.modal-nav button.primary{background:linear-gradient(135deg,#ff6b8a,#c0392b);border:none;color:#fff}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div>
-    <h1>🎓 Dashboard Giáo Viên - JLPT N3</h1>
-    <p>Theo dõi tiến độ lớp học theo thời gian thực</p>
-  </div>
+  <div><h1>&#127891; Dashboard Giao Vien - JLPT N3</h1><p>Theo doi tien do lop hoc theo thoi gian thuc</p></div>
   <div id="loginArea">
     <div class="login-form">
-      <input type="password" id="pwInput" placeholder="Mật khẩu giáo viên" onkeydown="if(event.key==='Enter')teacherLogin()"/>
-      <button class="btn" onclick="teacherLogin()">Đăng nhập</button>
+      <input type="password" id="pwInput" placeholder="Mat khau giao vien" onkeydown="if(event.key==='Enter')teacherLogin()"/>
+      <button class="btn" onclick="teacherLogin()">Dang nhap</button>
     </div>
-    <p style="color:#aaa;font-size:0.75rem;margin-top:0.5rem;text-align:right">Mật khẩu mặc định: teacher2024</p>
+    <p style="color:#aaa;font-size:0.75rem;margin-top:0.4rem;text-align:right">Mat khau mac dinh: teacher2024</p>
   </div>
   <div id="headerInfo" style="display:none;text-align:right">
-    <span class="realtime-dot"></span>
-    <span class="live-badge">LIVE</span>
-    <span class="refresh-info" id="lastRefresh">Cập nhật: --</span>
-    <br><button class="btn btn-sm" onclick="logout()" style="margin-top:0.5rem">Đăng xuất</button>
-    <button class="btn btn-sm" onclick="clearAllData()" style="background:rgba(192,57,43,0.3);border-color:#c0392b;margin-left:0.5rem">Xóa dữ liệu</button>
+    <span class="realtime-dot"></span> <span class="live-badge">LIVE</span>
+    <span class="refresh-info" id="lastRefresh">Cap nhat: --</span><br>
+    <button class="btn btn-sm" onclick="logout()" style="margin-top:0.5rem">Dang xuat</button>
+    <button class="btn btn-sm" onclick="clearAllData()" style="background:rgba(192,57,43,0.3);border-color:#c0392b;margin-left:0.5rem">Xoa du lieu</button>
   </div>
 </div>
 
 <div class="dashboard" id="dashboard">
   <div class="tab-bar">
-    <div class="tab active" onclick="showTab('overview')">📊 Tổng quan</div>
-    <div class="tab" onclick="showTab('students')">👥 Học sinh</div>
-    <div class="tab" onclick="showTab('mistakes')">❌ Câu sai nhiều</div>
-    <div class="tab" onclick="showTab('realtime')">⚡ Tốc độ làm bài</div>
+    <div class="tab active" onclick="showTab('overview',this)">&#128202; Tong quan</div>
+    <div class="tab" onclick="showTab('students',this)">&#128101; Hoc sinh</div>
+    <div class="tab" onclick="showTab('mistakes',this)">&#10060; Cau sai nhieu (click de chua bai)</div>
+    <div class="tab" onclick="showTab('realtime',this)">&#9889; Tien do</div>
   </div>
 
-  <!-- OVERVIEW TAB -->
   <div id="tab-overview">
-    <div class="stats-grid" id="statsGrid">
-      <div class="stat-card"><div class="val" id="totalStudents">0</div><div class="lbl">Học sinh đã nộp</div></div>
-      <div class="stat-card green"><div class="val" id="passRate">0%</div><div class="lbl">Tỉ lệ đạt</div></div>
-      <div class="stat-card yellow"><div class="val" id="avgScore">0</div><div class="lbl">Điểm trung bình</div></div>
-      <div class="stat-card red"><div class="val" id="mostWrongQ">-</div><div class="lbl">Câu sai nhiều nhất</div></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="val" id="totalStudents">0</div><div class="lbl">Hoc sinh da nop</div></div>
+      <div class="stat-card green"><div class="val" id="passRate">0%</div><div class="lbl">Ti le dat</div></div>
+      <div class="stat-card yellow"><div class="val" id="avgScore">0</div><div class="lbl">Diem trung binh</div></div>
+      <div class="stat-card red"><div class="val" id="mostWrongQ" style="font-size:1rem">--</div><div class="lbl">Cau sai nhieu nhat</div></div>
     </div>
     <div class="grid-2">
-      <div class="panel">
-        <h3>📈 Phân bố điểm số</h3>
-        <div style="position:relative;height:260px"><canvas id="scoreChart" role="img" aria-label="Biểu đồ phân bố điểm">Phân bố điểm học sinh</canvas></div>
-      </div>
-      <div class="panel">
-        <h3>🎯 Tỉ lệ đúng/sai theo phần</h3>
-        <div style="position:relative;height:260px"><canvas id="sectionChart" role="img" aria-label="Tỉ lệ đúng theo phần">Tỉ lệ đúng sai</canvas></div>
-      </div>
+      <div class="panel"><h3>Phan bo diem so</h3><div style="position:relative;height:260px"><canvas id="scoreChart" role="img" aria-label="Phan bo diem">Score</canvas></div></div>
+      <div class="panel"><h3>Ti le dung theo phan</h3><div style="position:relative;height:260px"><canvas id="sectionChart" role="img" aria-label="Ti le dung">Section</canvas></div></div>
     </div>
-    <div class="panel">
-      <h3>🕐 Biểu đồ nộp bài theo thời gian</h3>
-      <div style="position:relative;height:180px"><canvas id="timeChart" role="img" aria-label="Biểu đồ thời gian nộp">Thời gian nộp bài</canvas></div>
-    </div>
+    <div class="panel"><h3>Bieu do nop bai theo gio</h3><div style="position:relative;height:180px"><canvas id="timeChart" role="img" aria-label="Nop theo gio">Time</canvas></div></div>
   </div>
 
-  <!-- STUDENTS TAB -->
   <div id="tab-students" style="display:none">
     <div class="filter-bar">
-      <label>Lọc phần:</label>
+      <label>Loc phan:</label>
       <select id="filterSection" onchange="renderStudentTable()">
-        <option value="all">Tất cả</option>
-        <option value="vocab">文字・語彙</option>
-        <option value="grammar">文法・読解</option>
-        <option value="listening">聴解</option>
+        <option value="all">Tat ca</option>
+        <option value="vocab">Van tu</option>
+        <option value="grammar">Ngu phap / Doc hieu</option>
+        <option value="listening">Nghe hieu</option>
       </select>
-      <label>Sắp xếp:</label>
+      <label>Sap xep:</label>
       <select id="sortBy" onchange="renderStudentTable()">
-        <option value="time">Thời gian nộp</option>
-        <option value="score">Điểm (cao→thấp)</option>
-        <option value="name">Tên</option>
+        <option value="time">Thoi gian nop</option>
+        <option value="score">Diem (cao-thap)</option>
+        <option value="name">Ten</option>
       </select>
     </div>
-    <div class="panel">
-      <h3>👥 Danh sách học sinh</h3>
+    <div class="panel"><h3>Danh sach hoc sinh</h3>
       <div class="table-wrap">
-        <table id="studentTable">
-          <thead><tr><th>#</th><th>Học sinh</th><th>Lớp</th><th>Phần thi</th><th>Điểm</th><th>Đúng</th><th>Sai</th><th>Tỉ lệ</th><th>Kết quả</th><th>Thời gian làm</th></tr></thead>
-          <tbody id="studentTbody"></tbody>
-        </table>
+        <table><thead><tr><th>#</th><th>Hoc sinh</th><th>Lop</th><th>Phan thi</th><th>Diem</th><th>Dung</th><th>Sai</th><th>Ti le</th><th>KQ</th><th>TG lam</th></tr></thead>
+        <tbody id="studentTbody"></tbody></table>
       </div>
     </div>
   </div>
 
-  <!-- MISTAKES TAB -->
   <div id="tab-mistakes" style="display:none">
+    <div style="color:#aaa;font-size:0.85rem;margin-bottom:1rem;padding:0.8rem 1rem;background:rgba(255,215,0,0.07);border-radius:10px;border:1px solid rgba(255,215,0,0.2)">
+      &#128161; <b style="color:#ffd700">Meo:</b> Nhan vao bat ky cau nao de xem noi dung cau hoi, dap an dung va danh sach hoc sinh da sai - tien de chua bai cho ca lop!
+    </div>
     <div class="grid-2">
       <div class="panel">
-        <h3>❌ Top 10 câu sai nhiều nhất (toàn lớp)</h3>
+        <h3>Top 10 cau sai nhieu nhat <span style="font-size:0.75rem;color:#aaa;font-weight:400">(nhan de xem chi tiet)</span></h3>
         <div id="wrongList"></div>
       </div>
-      <div class="panel">
-        <h3>📊 Biểu đồ câu sai theo phần</h3>
-        <div style="position:relative;height:280px"><canvas id="mistakeChart" role="img" aria-label="Câu sai theo phần">Câu sai</canvas></div>
-      </div>
+      <div class="panel"><h3>Tong loi theo phan thi</h3><div style="position:relative;height:280px"><canvas id="mistakeChart" role="img" aria-label="Loi theo phan">Mistakes</canvas></div></div>
     </div>
     <div class="panel" style="margin-top:1.5rem">
-      <h3>📋 Chi tiết câu sai — Danh sách đầy đủ</h3>
+      <h3>Tat ca cau hoi - xep theo % sai <span style="font-size:0.75rem;color:#aaa;font-weight:400">(nhan nut de chua bai)</span></h3>
       <div class="table-wrap">
-        <table>
-          <thead><tr><th>Câu</th><th>Phần</th><th>Dạng câu</th><th>% sai</th><th>Số HS sai</th><th>Nội dung</th></tr></thead>
-          <tbody id="mistakeDetailTbody"></tbody>
-        </table>
+        <table><thead><tr><th>Cau</th><th>Phan</th><th>Dang</th><th>% sai</th><th>HS sai</th><th>Thao tac</th></tr></thead>
+        <tbody id="mistakeDetailTbody"></tbody></table>
       </div>
     </div>
   </div>
 
-  <!-- REALTIME TAB -->
   <div id="tab-realtime" style="display:none">
-    <div class="panel">
-      <h3>⚡ Tốc độ & Tiến độ từng học sinh</h3>
-      <p style="color:#aaa;font-size:0.82rem;margin-bottom:1rem">Cập nhật tự động mỗi 10 giây. Hiển thị % câu đã làm và điểm hiện tại.</p>
-      <div id="realtimeList"><div class="no-data">Đang chờ học sinh làm bài...</div></div>
+    <div class="panel"><h3>Tien do tung hoc sinh</h3>
+      <p style="color:#aaa;font-size:0.82rem;margin-bottom:1rem">Cap nhat tu dong moi 10 giay.</p>
+      <div id="realtimeList"><div class="no-data">Dang cho hoc sinh lam bai...</div></div>
     </div>
-    <div class="panel" style="margin-top:1.5rem">
-      <h3>📡 Nhật ký hoạt động</h3>
+    <div class="panel" style="margin-top:1.5rem"><h3>Nhat ky hoat dong</h3>
       <div id="activityLog" style="max-height:300px;overflow-y:auto;font-size:0.82rem;color:#aaa"></div>
     </div>
   </div>
 </div>
 
-<script>
-const TEACHER_PASS='teacher2024';
-let isLoggedIn=false, refreshInterval=null;
-let scoreChartInst=null, sectionChartInst=null, timeChartInst=null, mistakeChartInst=null;
+<!-- MODAL CHUA BAI -->
+<div class="modal-overlay" id="modalOverlay" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modalTitle">Chi tiet cau hoi</h3>
+      <button class="modal-close" onclick="closeModal()">&#10005;</button>
+    </div>
+    <div class="modal-stats" id="modalStats"></div>
+    <div class="type-badge" id="modalTypeBadge"></div>
+    <div class="q-text" id="modalQText"></div>
+    <div class="opts-grid" id="modalOpts"></div>
+    <div class="explain-box" id="modalExplain"></div>
+    <div class="who-wrong-box" id="modalWhoWrong"></div>
+    <div class="modal-nav">
+      <button onclick="closeModal()">Dong</button>
+      <button class="primary" onclick="prevWrongQ()">&#8592; Cau truoc</button>
+      <button class="primary" onclick="nextWrongQ()">Cau tiep &#8594;</button>
+    </div>
+  </div>
+</div>
 
-const QUESTION_META={
-  v1:{section:'vocab',type:'読み方',short:'問1 西洋の読み方'},
-  v2:{section:'vocab',type:'読み方',short:'問2 苦しいの読み方'},
-  v3:{section:'vocab',type:'読み方',short:'問3 他人の読み方'},
-  v4:{section:'vocab',type:'読み方',short:'問4 腹痛の読み方'},
-  v5:{section:'vocab',type:'読み方',short:'問5 終点の読み方'},
-  v6:{section:'vocab',type:'読み方',short:'問6 泣いての読み方'},
-  v7:{section:'vocab',type:'読み方',short:'問7 帯の読み方'},
-  v8:{section:'vocab',type:'読み方',short:'問8 郵便の読み方'},
-  v9:{section:'vocab',type:'漢字',short:'問9 あたりの漢字'},
-  v10:{section:'vocab',type:'漢字',short:'問10 ずの漢字'},
-  v11:{section:'vocab',type:'漢字',short:'問11 へりの漢字'},
-  v12:{section:'vocab',type:'漢字',short:'問12 ほどうの漢字'},
-  v13:{section:'vocab',type:'漢字',short:'問13 うつの漢字'},
-  v14:{section:'vocab',type:'漢字',short:'問14 せいかくの漢字'},
-  v15:{section:'vocab',type:'語彙',short:'問15 時差'},
-  v16:{section:'vocab',type:'語彙',short:'問16 しかたない'},
-  v17:{section:'vocab',type:'語彙',short:'問17 決心'},
-  v18:{section:'vocab',type:'語彙',short:'問18 冗談'},
-  v19:{section:'vocab',type:'語彙',short:'問19 預けて'},
-  v20:{section:'vocab',type:'語彙',short:'問20 アナウンス'},
-  v21:{section:'vocab',type:'語彙',short:'問21 案外'},
-  v22:{section:'vocab',type:'語彙',short:'問22 努力'},
-  v23:{section:'vocab',type:'語彙',short:'問23 ぺこぺこ'},
-  v24:{section:'vocab',type:'語彙',short:'問24 確実な'},
-  v25:{section:'vocab',type:'語彙',short:'問25 取り付けて'},
-  v26:{section:'vocab',type:'類語',short:'問26 清潔'},
-  v27:{section:'vocab',type:'類語',short:'問27 さっき'},
-  v28:{section:'vocab',type:'類語',short:'問28 キッチン'},
-  v29:{section:'vocab',type:'類語',short:'問29 指導'},
-  v30:{section:'vocab',type:'類語',short:'問30 おやすみ'},
-  v31:{section:'vocab',type:'用法',short:'問31 にぎる'},
-  v32:{section:'vocab',type:'用法',short:'問32 修理'},
-  v33:{section:'vocab',type:'用法',short:'問33 目的'},
-  v34:{section:'vocab',type:'用法',short:'問34 懐かしい'},
-  v35:{section:'vocab',type:'用法',short:'問35 変化'},
-  g1:{section:'grammar',type:'文法',short:'問1 何度も'},
-  g2:{section:'grammar',type:'文法',short:'問2 なんか'},
-  g3:{section:'grammar',type:'文法',short:'問3 でなら'},
-  g4:{section:'grammar',type:'文法',short:'問4 あまりに'},
-  g5:{section:'grammar',type:'文法',short:'問5 にしたがって'},
-  g6:{section:'grammar',type:'文法',short:'問6 読み終わったら'},
-  g7:{section:'grammar',type:'文法',short:'問7 帰ってしまう前に'},
-  g8:{section:'grammar',type:'文法',short:'問8 建てられたのは'},
-  g9:{section:'grammar',type:'文法',short:'問9 みたいだ'},
-  g10:{section:'grammar',type:'文法',short:'問10 教えてほしい'},
-  g11:{section:'grammar',type:'文法',short:'問11 はずがない'},
-  g12:{section:'grammar',type:'文法',short:'問12 買ってきてくれる'},
-  g13:{section:'grammar',type:'文法',short:'問13 出られそうだ'},
-  g14:{section:'grammar',type:'並べ替え',short:'問14 並べ替え1'},
-  g15:{section:'grammar',type:'並べ替え',short:'問15 並べ替え2'},
-  g16:{section:'grammar',type:'並べ替え',short:'問16 並べ替え3'},
-  g17:{section:'grammar',type:'並べ替え',short:'問17 並べ替え4'},
-  g18:{section:'grammar',type:'並べ替え',short:'問18 並べ替え5'},
-  g19:{section:'grammar',type:'文章文法',short:'問19 思っていたからです'},
-  g20:{section:'grammar',type:'文章文法',short:'問20 でも'},
-  g21:{section:'grammar',type:'文章文法',short:'問21 どの'},
-  g22:{section:'grammar',type:'文章文法',short:'問22 場所なのです'},
-  g23:{section:'grammar',type:'読解',short:'問23 野菜スープ'},
-  g24:{section:'grammar',type:'読解',short:'問24 ピクニック会員'},
-  g25:{section:'grammar',type:'読解',short:'問25 旅館メール'},
-  g26:{section:'grammar',type:'読解',short:'問26 地下鉄の工夫'},
-  g27:{section:'grammar',type:'読解',short:'問27 スーパー①'},
-  g28:{section:'grammar',type:'読解',short:'問28 スーパー②'},
-  g29:{section:'grammar',type:'読解',short:'問29 スーパー③'},
-  g30:{section:'grammar',type:'読解',short:'問30 分散型ホテル①'},
-  g31:{section:'grammar',type:'読解',short:'問31 分散型ホテル②'},
-  g32:{section:'grammar',type:'読解',short:'問32 分散型ホテル③'},
-  g33:{section:'grammar',type:'読解',short:'問33 絵本①'},
-  g34:{section:'grammar',type:'読解',short:'問34 絵本②'},
-  g35:{section:'grammar',type:'読解',short:'問35 絵本③'},
-  g36:{section:'grammar',type:'読解',short:'問36 絵本④'},
-  g37:{section:'grammar',type:'読解',short:'問37 図書館①'},
-  g38:{section:'grammar',type:'読解',short:'問38 図書館②'},
-  l1:{section:'listening',type:'問題1',short:'問1-1 予約時間'},
-  l2:{section:'listening',type:'問題1',short:'問1-2 最初の仕事'},
-  l3:{section:'listening',type:'問題1',short:'問1-3 地図順序'},
-  l4:{section:'listening',type:'問題1',short:'問1-4 最初にすること'},
-  l5:{section:'listening',type:'問題1',short:'問1-5 学生の行動'},
-  l6:{section:'listening',type:'問題1',short:'問1-6 アルバイト'},
-  l7:{section:'listening',type:'問題2',short:'問2-1 赤ちゃんプレゼント'},
-  l8:{section:'listening',type:'問題2',short:'問2-2 眠れない原因'},
-  l9:{section:'listening',type:'問題2',short:'問2-3 藻の役割'},
-  l10:{section:'listening',type:'問題2',short:'問2-4 明日の天気'},
-  l11:{section:'listening',type:'問題2',short:'問2-5 バラの選び方'},
-  l12:{section:'listening',type:'問題2',short:'問2-6 ケーキが売れない理由'},
-  l13:{section:'listening',type:'問題3',short:'問3-1 総合問題'},
-  l14:{section:'listening',type:'問題4',short:'問4-1 コピー機発話'},
-  l15:{section:'listening',type:'問題4',short:'問4-2 電気店発話'},
-  l16:{section:'listening',type:'問題4',short:'問4-3 友達の家発話'},
-  l17:{section:'listening',type:'問題4',short:'問4-4 ホテル発話'},
-  l18:{section:'listening',type:'問題5',short:'問5-1 返答'},
-  l19:{section:'listening',type:'問題5',short:'問5-2 返答'},
-  l20:{section:'listening',type:'問題5',short:'問5-3 返答'}
+<script>
+
+const QUESTIONS_DB = {
+  v1:{s:'vocab',t:'Yomi',sh:'Q1 Seiyo',tx:'Kore wa <b>seiyo</b> no tatemono no shashin desu.',op:['seyou','seiyuu','seiyou','seyuu'],a:3,ex:'[Seiyo=seiyou] Phuong Tay. Tay=sei, Duong=you. Khong phai seyou hay seiyuu.'},
+  v2:{s:'vocab',t:'Yomi',sh:'Q2 Kurushii',tx:'Konkai wa totemo <b>kurushii</b> shiai datta.',op:['oshii','kurushii','kuyashii','kibishii'],a:2,ex:'[Kurushii] Kho khan, dau kho. Kuyashii=tiec nuoi, Kibishii=nghiem khac. Chon 2.'},
+  v3:{s:'vocab',t:'Yomi',sh:'Q3 Tanin',tx:'Kono tegami wa <b>tanin</b> ni misenaide kudasai.',op:['tanjin','tajin','tannin','tanin'],a:4,ex:'[Tanin] Nguoi khac. Ta(た)+Nin(にん). Dung: ta-ni-n. Khong phai tanjin hay tannin.'},
+  v4:{s:'vocab',t:'Yomi',sh:'Q4 Fukutsuu',tx:'Kinou wa <b>fukutsuu</b> de gakkou wo yasumimashita.',op:['fukutsuu','fukutsu','zutsuu','zutsu'],a:1,ex:'[Fukutsuu] Dau bung. Fuku(腹)=bung+Tsuu(痛)=dau. Zutsuu la dau dau (頭痛). Chon 1.'},
+  v5:{s:'vocab',t:'Yomi',sh:'Q5 Shuuten',tx:'Tsugi no eki ga <b>shuuten</b> desu.',op:['shuuden','shuuten','juuten','juuden'],a:2,ex:'[Shuuten] Diem cuoi / ga cuoi. Shuu(終)=ket thuc+Ten(点)=diem. Juuten=Trong diem(重点). Chon 2.'},
+  v6:{s:'vocab',t:'Yomi',sh:'Q6 Naite',tx:'Morita-san ga <b>naite</b> imashita.',op:['hataraite','odoroite','naite','yaite'],a:3,ex:'[Naite] Khoc (泣く→泣いて). Yaite=nuong, Odoroite=ngac nhien. Chon 3.'},
+  v7:{s:'vocab',t:'Yomi',sh:'Q7 Obi',tx:'Kono kimono no <b>obi</b> wa utsukushii desu.',op:['obi','eri','sode','ito'],a:1,ex:'[Obi 帯] Day that lung kimono. Eri=co ao, Sode=tay ao, Ito=chi soi. Chon 1.'},
+  v8:{s:'vocab',t:'Yomi',sh:'Q8 Yuubin',tx:'Kinou haha kara <b>yuubin</b> ga todoita.',op:['youben','youbin','yuuben','yuubin'],a:4,ex:'[Yuubin 郵便] Thu tin / buu dien. Yuu(郵)+Bin(便). Khong phai youbin hay yuuben. Chon 4.'},
+  v9:{s:'vocab',t:'Kanji',sh:'Q9 Atari',tx:'Kono atari wa manshon ga ooi.',op:['Toori','Atari','Kaeri','Mukae'],a:2,ex:'[Atari=辺り] Khu vuc xung quanh. Toori=con duong, Kaeri=ve nha. Chon 2.'},
+  v10:{s:'vocab',t:'Kanji',sh:'Q10 Zu',tx:'Tsugi no zu wo mite kudasai.',op:['E','Zu','Hyou','Rei'],a:2,ex:'[Zu=図] Hinh ve / so do. E=tranh, Hyou=bang, Rei=vi du. Chi do=chizu(地図). Chon 2.'},
+  v11:{s:'vocab',t:'Kanji',sh:'Q11 Heru',tx:'Chokin ga sukoshi herimashita.',op:['Hosorimashita','Hikurimashita','Kiemashita','Herimashita'],a:4,ex:'[Heru=減る] Giam xuong. Doi lap voi Fueru(増える=tang). Chon 4.'},
+  v12:{s:'vocab',t:'Kanji',sh:'Q12 Hodou',tx:'Rainen, koko ni hodou ga dekiru sou da.',op:['Hodou1','Soudou','Hodou','Soudou2'],a:3,ex:'[Hodou=歩道] Via he. Ho(歩)=di bo+Dou(道)=duong. Chon 3.'},
+  v13:{s:'vocab',t:'Kanji',sh:'Q13 Utsu',tx:'Pasokon no kiibodo wo utsu oto ga kikoeru.',op:['Utsu','Oshitsu','YubitsU','Oritsu'],a:1,ex:'[Utsu=打つ] Go phim. Osu=an/day, Oru=gap/be. Go keyboard=打つ. Chon 1.'},
+  v14:{s:'vocab',t:'Kanji',sh:'Q14 Seikaku',tx:'Yamada-san wa majime na seikaku da.',op:['Seikaku1','Seikaku2','Seikaku','Seikaku3'],a:3,ex:'[Seikaku=性格] Tinh cach. Sei(性)+Kaku(格). Majime na seikaku=tinh cach cham chi/nghiem tuc. Chon 3.'},
+  v15:{s:'vocab',t:'Goi',sh:'Q15 Jisa',tx:'Watashi no kuni to Nihon wa (　) ga 12 jikan aru node, hiru to yoru ga hantai da.',op:['Jidai','Jiki','Jisoku','Jisa'],a:4,ex:'[Jisa=時差] Chenh lech mui gio / time difference. Jidai=thoi dai, Jiki=thoi ky, Jisoku=toc do. Chon 4.'},
+  v16:{s:'vocab',t:'Goi',sh:'Q16 Shikatanal',tx:'Jitensha ga kowarete shimai, (　) node aruite ie ni kaerimashita.',op:['Kuwashii','Darashinai','Shikatanal','Urayamashii'],a:3,ex:'[Shikatanal] Khong con cach nao khac. Kuwashii=chi tiet, Darashinai=lon xon, Urayamashii=ghen ti. Chon 3.'},
+  v17:{s:'vocab',t:'Goi',sh:'Q17 Kesshin',tx:'Byouki no hito wo naoshitakute, koukou no toki ni isha ni naru koto wo (　) shita.',op:['Yosou','Kesshin','Shoumei','Katei'],a:2,ex:'[Kesshin=決心] Quyet tam. Yosou=du doan, Shoumei=chung minh, Katei=gia dinh/gia dinh. Chon 2.'},
+  v18:{s:'vocab',t:'Goi',sh:'Q18 Joudan',tx:'Kare wa itsumo (　) wo itte, minna wo warawaseru omoshiroi hito da.',op:['Kansou','Monku','Joudan','Jiman'],a:3,ex:'[Joudan=冗談] Chuyen dua/joke. Kansou=cam nghi, Monku=phan nan, Jiman=khoe khoang. Chon 3.'},
+  v19:{s:'vocab',t:'Goi',sh:'Q19 Azukete',tx:'Hoteru ni touchaku shita ga, mada heya ni hairenakatta node, uketsuke ni nimotsu wo (　) dekaketa.',op:['Azukete','Tomete','Kubatte','Ataete'],a:1,ex:'[Azukete=預けて] Gui hanh ly. Tomeru=cho o lai, Kubaru=phan phat, Ataeru=cho. Gui hanh ly=荷物を預ける. Chon 1.'},
+  v20:{s:'vocab',t:'Goi',sh:'Q20 Anaunsu',tx:'Kuukou ni tsuita toki, hikouki no shuppatsu ga okureru to iu (　) ga kikoeta.',op:['Gaidansu','Anaunsu','Komaasharu','Supiichi'],a:2,ex:'[Anaunsu=announcement] Thong bao (qua loa). Gaidansu=huong dan, Komaasharu=quang cao, Supiichi=bai phat bieu. Chon 2.'},
+  v21:{s:'vocab',t:'Goi',sh:'Q21 Angai',tx:'Kyuujitsu de juutai suru to omoimashita ga, (　) michi wa suite imashita.',op:['Totsuzen','Touzen','Nenjuu','Angai'],a:4,ex:'[Angai=案外] Trai voi du doan / surprisingly. Totsuzen=dot nhien, Touzen=duong nhien, Nenjuu=quanh nam. Chon 4.'},
+  v22:{s:'vocab',t:'Goi',sh:'Q22 Doryoku',tx:'Kare wa wakai toki hijou ni kurou shita ga, isshoukenmei (　) shite, rippa na seijika ni natta.',op:['Doryoku','Nattoku','Kitai','Chuui'],a:1,ex:'[Doryoku=努力] No luc. Nattoku=hieu/dong y, Kitai=ky vong, Chuui=chu y. No luc het minh=一生懸命努力する. Chon 1.'},
+  v23:{s:'vocab',t:'Goi',sh:'Q23 Pekopeko',tx:'Jikan ga nakute, asa mo hiru mo gohan wo taberarenakatta node, onaka ga (　) da.',op:['Perapera','Karakara','Pekopeko','Dokidoki'],a:3,ex:'[Pekopeko] Bung reo vi doi. Perapera=noi troi chay, Karakara=kho kiet, Dokidoki=tim dap thich thich. Chon 3.'},
+  v24:{s:'vocab',t:'Goi',sh:'Q24 Kakujitsu',tx:'Hayashi-san ga kaisha wo yameru to iu no wa, Hayashi-san kara chokusetsu kiita node (　) jouhou desu.',op:['Manzoku','Seijou','Kanzen','Kakujitsu'],a:4,ex:'[Kakujitsu=確実な] Chac chan / reliable. Manzoku=hai long, Seijou=binh thuong, Kanzen=hoan toan. Chon 4.'},
+  v25:{s:'vocab',t:'Goi',sh:'Q25 Toritsukete',tx:'Denki no kouji no hito ga kite, heya no kabe ni eakon wo (　) kureta.',op:['Toritsukete','Toriagete','Ukeirete','Hikiukete'],a:1,ex:'[Toritsukete=取り付けて] Lap dat. Toriageru=lay di, Ukeireru=chap nhan, Hikiukeru=dam nhan. Lap may lanh=エアコンを取り付ける. Chon 1.'},
+  v26:{s:'vocab',t:'Ruigo',sh:'Q26 Seiketsu',tx:'<b>Seiketsu</b> na taoru de fuite kudasai.',op:['Yawarakai','Nureta','Kawaita','Kireina'],a:4,ex:'[Seiketsu=清潔] Sach se. Tuong duong: kireina(きれいな). Yawarakai=mem, Nureta=uot, Kawaita=kho. Chon 4.'},
+  v27:{s:'vocab',t:'Ruigo',sh:'Q27 Sakki',tx:'<b>Sakki</b> gohan wo tabemashita.',op:['Isoide','Sukoshi okurete','Sukoshi mae ni','Yukkuri'],a:3,ex:'[Sakki] Vua roi / a little while ago. Tuong duong: sukoshi mae ni(少し前に). Isoide=voi vang, Yukkuri=tu tu. Chon 3.'},
+  v28:{s:'vocab',t:'Ruigo',sh:'Q28 Kitchen',tx:'Kore wa <b>kitchin</b> ni oite kudasai.',op:['Ima','Daidokoro','Rouka','Furo'],a:2,ex:'[Kitchen] Nha bep. Tuong duong: Daidokoro(台所). Ima=phong khach, Rouka=hanh lang, Furo=nha tam. Chon 2.'},
+  v29:{s:'vocab',t:'Ruigo',sh:'Q29 Shidou',tx:'Ima, Noguchi-san ga <b>shidou</b> shite imasu.',op:['Shirabete','Kotaete','Kiite','Oshiete'],a:4,ex:'[Shidou=指導] Huong dan/day do. Tuong duong: Oshiete(教えて). Shiraberu=tra cuu, Kotaeru=tra loi, Kiku=nghe/hoi. Chon 4.'},
+  v30:{s:'vocab',t:'Ruigo',sh:'Q30 Oyasumi',tx:'Sorosoro <b>oyasumi</b> ni shimashou.',op:['Yasumimashou','Shokuji ni shimashou','Owari ni shimashou','Nemashou'],a:4,ex:'[Oyasumi ni suru] Di ngu. Tuong duong: Nemashou(寝ましょう). "Oyasumi nasai"=chuc ngu ngon. Chon 4.'},
+  v31:{s:'vocab',t:'Youhou',sh:'Q31 Nigiru',tx:'<b>Nigiru</b> no tadashii tsukaikata wa?',op:['Omoi kagu wo nigiru','Otouto no te wo shikkari to nigiru','Boushi ga tobasa nigiru','Akachan wo daiji sou ni nigiru'],a:2,ex:'[Nigiru=握る] Nam chat tay. Dung voi: te wo nigiru(手を握る=nam tay). Kagu=mang do noi that, Boushi=bat mu=toru/tsukamau, Akachan=om be=daku. Chon 2.'},
+  v32:{s:'vocab',t:'Youhou',sh:'Q32 Shuuri',tx:'<b>Shuuri</b> no tadashii tsukaikata wa?',op:['Naka wo shuuri shitai','Byouin de shuuri shita','Jitensha wo shuuri shita','Kanji wo shuuri shita'],a:3,ex:'[Shuuri=修理] Sua chua (do vat). Dung voi: jitensha wo shuuri suru. Moi quan he=shuufuku, Co the=chiryou, Chu thich=naosu. Chon 3.'},
+  v33:{s:'vocab',t:'Youhou',sh:'Q33 Mokuteki',tx:'<b>Mokuteki</b> no tadashii tsukaikata wa?',op:['Mokuteki no 10man yen','Madogawa no seki to mokuteki','Shucchou suru mokuteki','Kono kenkyuu no mokuteki wa...'],a:4,ex:'[Mokuteki=目的] Muc dich. Dung voi: kenkyu no mokuteki(nghien cuu). 10man=Mokuhyou(目標), Seki=Kibou(希望), Shucchou=Yotei(予定). Chon 4.'},
+  v34:{s:'vocab',t:'Youhou',sh:'Q34 Natsukashii',tx:'<b>Natsukashii</b> no tadashii tsukaikata wa?',op:['Kodomo no koro no shashin wo mite natsukashii','800nen mae ni taterareta natsukashii tera','Tsuma to wa natsukashii kankei','Atte sugu ni natsukashii tomodachi ni natta'],a:1,ex:'[Natsukashii=懐かしい] Nho ky niem xua / nostalgic. Dung khi nho qua khu. 800nen=furui(co xua), Tsuma=shitashii(than thiet), Atte sugu=naka no yoi(than thiet). Chon 1.'},
+  v35:{s:'vocab',t:'Youhou',sh:'Q35 Henka',tx:'<b>Henka</b> no tadashii tsukaikata wa?',op:['Yakusoku ga henka shita','Juusho ga henka shita','Seikatsu wa ooki ku henka shita','Shikai ga henka suru'],a:3,ex:'[Henka=変化] Su thay doi (hien tuong/xa hoi). Dung voi: seikatsu ga henka suru. Yakusoku=Henkou(変更), Juusho=Henkou, Shikai=Kowtai(交代). Chon 3.'},
+  g1:{s:'grammar',t:'Bunpou',sh:'Q1 Nando mo',tx:'Tanaka-san wa Kyoto ga daisuki de, ima made ni nando (　) itta koto ga aru sou da.',op:['mo','wa','nado','gurai'],a:1,ex:'[Nando mo] Nhieu lan. "Mo" nhan manh so luong. "Nando mo iku"=di nhieu lan. "Nado"=hay gi do, "Gurai"=khoang. Chon 1.'},
+  g2:{s:'grammar',t:'Bunpou',sh:'Q2 Nanka',tx:'"Samui kara, atatakai udon (　) dou?"',op:['ni','dake','made','nanka'],a:4,ex:'[Nanka] De nghi nhe nhang. "Udon nanka dou?"=An udon hay gi do khong? "Nanka" lam mem de nghi. "Dake"=chi, "Made"=den. Chon 4.'},
+  g3:{s:'grammar',t:'Bunpou',sh:'Q3 De nara',tx:'Tegami (　), fudan wa hazukashikute nakanaka ienai kansha no kimochi wo tsutaerareru kara da.',op:['de nara','ni na','de shika','ni shika'],a:1,ex:'[De nara] Neu la bang cach do thi... "Tegami de nara" = neu qua thu thi co the noi. "De shika~nai"=chi bang cach do. "Ni shika~nai"=chi voi ai/cai do. Chon 1.'},
+  g4:{s:'grammar',t:'Bunpou',sh:'Q4 Amari ni',tx:'Itsumo wa ame demo jitensha de daigaku ni iku ga, kesa wa (　) ame ga tsuyokatta node, basu de itta.',op:['chittomo','amari ni','shidai ni','ima ni mo'],a:2,ex:'[Amari ni] Qua muc. "Amari ni tsuyokatta"=mua qua to. "Chittomo~nai"=hoan toan khong, "Shidai ni"=dan dan, "Ima ni mo"=sap suu. Chon 2.'},
+  g5:{s:'grammar',t:'Bunpou',sh:'Q5 Ni shitagatte',tx:'Senshuu, tozan wo shita. Nobotte iku (　) kaze ga tsumetaku natte, totemo kimochi ga yokatta.',op:['to suru to','no to kuraberu to','ni shitagatte','ni taishite'],a:3,ex:'[Ni shitagatte] Cang...cang. "Noboru ni shitagatte kaze ga tsumetaku naru"=cang len cao gio cang lanh. Tuong tu "ni tsure te". "Ni taishite"=doi voi. Chon 3.'},
+  g6:{s:'grammar',t:'Bunpou',sh:'Q6 Yomi owattara',tx:'"Sore, mada tochuu nan da. (　), kashite ageru ne."',op:['Yonde itara','Yomi tsuzuketara','Yonde oitara','Yomi owattara'],a:4,ex:'[Yomi owattara] Sau khi doc xong. V+owaru+tara=sau khi hoan thanh. "Tochuu=dang doc do" nen phai "yomi owattara" moi cho muon. Chon 4.'},
+  g7:{s:'grammar',t:'Bunpou',sh:'Q7 Kaette shimau mae ni',tx:'Tomodachi ga kuni ni (　), iroiro na koto wo issho ni shitai.',op:['kaette ite','kaette shimaeba','kaette iru aida','kaette shimau mae ni'],a:4,ex:'[Kaette shimau mae ni] Truoc khi ve nuoc. "Mae ni"=truoc khi. "Kaette shimau"=sap ve roi. "Iru aida"=trong khi van o lai. Chon 4.'},
+  g8:{s:'grammar',t:'Bunpou',sh:'Q8 Taterareta no wa',tx:'Kono tera wa, kennai de mottomo furui tera de, (　) ima kara 1000 nen ijou mae da sou da.',op:['Taterarete kara wa','Taterareta no wa','Tatesaseru made wa','Tatesaseta toki wa'],a:2,ex:'[Taterareta no wa] Viec duoc xay dung la... "~no wa~da"=nhan manh thoi gian. Thu dong=taterareta. "No wa~da sou da"=nghe noi la. Chon 2.'},
+  g9:{s:'grammar',t:'Bunpou',sh:'Q9 Mitai da',tx:'"Ninki ga aru (　) yo. Kinou mise no mae wo tottakedo, takusan hito ga narande ta yo."',op:['koto da','sei da','mitai da','tsumori da'],a:3,ex:'[Mitai da] Co ve... / hinh nhu. Suy luan tu quan sat. "Koto da"=loi khuyen, "Sei da"=do loi, "Tsumori da"=du dinh. Thay nhieu nguoi xep hang -> co ve noi tieng. Chon 3.'},
+  g10:{s:'grammar',t:'Bunpou',sh:'Q10 Oshiete hoshii',tx:'"Kono chikaku de, ii ganka wo shitte itara (　). Asa kara me ga kayukute."',op:['Oshietai n desu ga','Oshiete mo ii desu ka','Oshiete morau n desu ka','Oshiete hoshii n desu ga'],a:4,ex:'[Oshiete hoshii n desu ga] Toi muon nho ban chi cho. "~te hoshii"=muon nguoi khac lam cho minh. "~te mo ii desu ka"=xin phep, "Oshietai"=toi muon noi (nguoc lai). Chon 4.'},
+  g11:{s:'grammar',t:'Bunpou',sh:'Q11 Hazu ga nai',tx:'Hayashi-san ga tsukutta gurafu na no dakara, (　) to omou.',op:['Wakaranai ni chigainai','Wakaranai hazu ga nai','Wakaranai kamo shirenai','Wakaranakute mo kamawanai'],a:2,ex:'[Hazu ga nai] Khong the khong biet. "~hazu ga nai"=logic la khong the. Tu minh lam bieu do -> chi co the biet. "Ni chigainai"=chac chan la, "Kamo"=co the. Chon 2.'},
+  g12:{s:'grammar',t:'Bunpou',sh:'Q12 Katte kite kureru',tx:'Chichi wa, shucchou ni iku to, haha to watashi ni kanarazu omiyage wo (　).',op:['Katte kite ageru','Katte itte ageru','Katte kite kureru','Katte itte kureru'],a:3,ex:'[Katte kite kureru] Bo di mua qua ve cho chung toi. "Kureru"=nguoi khac lam cho minh. "Te kuru"=di roi ve. Bo di mua roi mang ve=katte kite kureru. Chon 3.'},
+  g13:{s:'grammar',t:'Bunpou',sh:'Q13 Deraresou da',tx:'Ashita wa jugyou ni (　).',op:['Deraresou da','Deraresou da 2','Desou da','Derusou da'],a:1,ex:'[Deraresou da] Co ve co the di hoc duoc. "Sou da"(you-tai)=nhin ve/co ve. "Derareru"=co the di. "Deraresou"=co ve co the di. "Deraresou da 2"=nghe noi(truyen ngan), "Derusou da"=nghe noi se di. Chon 1.'},
+  g14:{s:'grammar',t:'Narabikae',sh:'Q14 Narabikae 1',tx:'Kinou, honya de shousetsu 2 satsu ___ ___ star ___ hon wo 1 satsu katta.',op:['to/no/ni tsuite/repo-to no kakikata','no/to/repo-to no kakikata/ni tsuite','to/repo-to no kakikata/ni tsuite/no','repo-to no kakikata/ni tsuite/to/no'],a:3,ex:'Dap an: "shousetsu 2 satsu to / repo-to no kakikata ni tsuite / no / hon wo 1 satsu katta". Cau truc: 2 satsu + to + [repo-to no kakikata ni tsuite] + no + hon. Chon 3.'},
+  g15:{s:'grammar',t:'Narabikae',sh:'Q15 Narabikae 2',tx:'A:"Ano kissaten, ___ ___ star ___ ga aru yo. Haitte minai?"',op:['de/ka nani ka/terebi/mita koto','terebi/de/mita koto/ka nani ka','terebi/ka nani ka/de/mita koto','ka nani ka/terebi/de/mita koto'],a:3,ex:'Dap an: "terebi / ka nani ka / de / mita koto ga aru yo". Terebi + ka nani ka(hay gi do) + de(phuong tien) + mita koto ga aru. Chon 3.'},
+  g16:{s:'grammar',t:'Narabikae',sh:'Q16 Narabikae 3',tx:'Hikeba ___ ___ star ___ jibun demo wakari, totemo tanoshii.',op:['jouzu ni/hiku hodo/natte iku no ga/hikeru you ni','hiku hodo/hikeru you ni/jouzu ni/natte iku no ga','hikeru you ni/jouzu ni/natte iku no ga/hiku hodo','hikeru you ni/hiku hodo/jouzu ni/natte iku no ga'],a:2,ex:'Dap an: "hikeba hiku hodo / hikeru you ni / jouzu ni / natte iku no ga wakari". Cau truc ~ba~hodo(cang...cang) + tien bo dan. Chon 2.'},
+  g17:{s:'grammar',t:'Narabikae',sh:'Q17 Narabikae 4',tx:'Kaisha kara tooi ___ ___ star ___ kara da.',op:['Kitamachi wo eranda/no wa/zutto Kitamachi ni sunde mitakatta/no ni','no wa/no ni/Kitamachi wo eranda/zutto Kitamachi ni sunde mitakatta','no ni/no wa/zutto Kitamachi ni sunde mitakatta/Kitamachi wo eranda','no wa/Kitamachi wo eranda/no ni/zutto Kitamachi ni sunde mitakatta'],a:1,ex:'Dap an: "tooi no wa / Kitamachi wo eranda / no ni / zutto sunde mitakatta kara". Cau truc: ~no wa [chon Kitamachi] no ni [du xa] vi [muon o]. Chon 1.'},
+  g18:{s:'grammar',t:'Narabikae',sh:'Q18 Narabikae 5',tx:'Kabi wo fusegu ___ ___ star ___ juuyou rashii.',op:['koto ga/tsukatta ato/nureta mama ni shinai/tame ni wa','tame ni wa/tsukatta ato/nureta mama ni shinai/koto ga','tsukatta ato/tame ni wa/koto ga/nureta mama ni shinai','tame ni wa/nureta mama ni shinai/koto ga/tsukatta ato'],a:2,ex:'Dap an: "fusegu tame ni wa / tsukatta ato / nureta mama ni shinai / koto ga juuyou". Cau truc: ~tame ni wa + dieu kien + koto ga juuyou. Chon 2.'},
+  g19:{s:'grammar',t:'Bunshou',sh:'Q19 Omotte ita kara',tx:'"Kaisha ga chigatte mo, utte iru shouhin wa onaji da to [19]."',op:['Omoimasu','Omotte shimaimasu','Omotte ita kara desu','Omotta koto desu'],a:3,ex:'[Omotte ita kara desu] Vi da tung nghi nhu vay. Van canh: "kizuita no wa~deshita" (da nhan ra)->"truoc day da nghi" nen dung qua khu "otte ita" + ly do "kara desu". Chon 3.'},
+  g20:{s:'grammar',t:'Bunshou',sh:'Q20 Demo',tx:'"Nomimono nado ga urarete iru no wa onaji desu. [20], sorezore no kaisha no... dokujino shouhin ga aru no desu."',op:['Tsumari','Tokoro de','Chinaini','Demo'],a:4,ex:'[Demo] Nhung / however. Truoc: "giong nhau", Sau: "co san pham rieng"=doi lap->Demo. "Tsumari"=tuc la, "Tokoro de"=chuyen doi chu de, "Chinami ni"=nhan tien. Chon 4.'},
+  g21:{s:'grammar',t:'Bunshou',sh:'Q21 Dono',tx:'"Mite iru dake demo tanoshii shi, [21] kaisha mo ii shouhin wo urou to ganbatte iru you de, ouentashiku narimasu."',op:['Dono','Sono','Kono','Ano'],a:1,ex:'[Dono~mo] Tat ca cac... "Dono kaisha mo"=tat ca cac cong ty. Sono=cong ty do (cu the), Kono=cong ty nay, Ano=cong ty do (da biet). Noi ve tat ca cac chuoi Combini. Chon 1.'},
+  g22:{s:'grammar',t:'Bunshou',sh:'Q22 Ba sho na no desu',tx:'"Iku to tanoshii kibun ni nareru [22]."',op:['Basho ni shita no desu','Basho na no desu','Basho ni suru no deshou','Basho na no deshouka'],a:2,ex:'[Basho na no desu] Do la noi... "~na no desu"=giai thich/nhan manh. Ket thuc van luan viet nen dung "no desu" khang dinh. "Deshouka"=nghi van, "Ni shita"=qua khu quyet dinh. Chon 2.'},
+  g23:{s:'grammar',t:'Dokkai',sh:'Q23 Yasai Soup',tx:'Q23: "Yatte miyou to omotta" towa, nani wo shiyou to omotta no ka? (Yasai no kawa no soup)',op:['Dashi wo tsukawanaide ryouri suru','Yasai no kawa kara dashi wo toru','30pun gurai nite kara kawa wo muku','Kawa wo muite inai yasai de soup wo tsukuru'],a:2,ex:'Dap an 2. Ban: "kawa wo nite dashi wo totta". Ngu viet: "lan nay toi cung thu xem" -> Thu lam dashi tu vo rau. Chon 2.'},
+  g24:{s:'grammar',t:'Dokkai',sh:'Q24 Picnic kaiin',tx:'Q24: Picnic ni sanka suru toki ni kaiin ni narou to omotte iru hito wa dou shinakereba naranai ka?',op:['Meeru de renraku shite, nenkaihi to nomimono wo motte iku','Nenkaihi to okashi to nomimono wo motte iku','Nenkaihi to sankahi to nomimono wo motte iku','Nenkaihi to nomimono wo motte iku'],a:4,ex:'Dap an 4. Theo thong bao: khong can lien he truoc, banh da co san (khong phai mang), nuoc mang theo, gia hoi vien 2000 yen->thanh toan hoi phi khi do-> mien phi tham du. Vay chi can: hoi phi + nuoc. Chon 4.'},
+  g25:{s:'grammar',t:'Dokkai',sh:'Q25 Ryokan mail',tx:'Q25: Ryokan no hito ga, kono meeru de tsutaetai koto wa dore ka?',op:['3/25 washitsu wa aiteiru ga wayoushitsu mo kentou','3/25 washitsu wa yoyaku dekinai node wayoushitsu wo kentou','3/25 wa dono heya mo yoyaku dekinai node betsu no hi wo','Washitsu wa ninki de hayame ni yoyaku shite hoshii'],a:2,ex:'Dap an 2. Noi dung: phong tatami day het, phong wayoushitsu con trong. Tin chinh: "phong tatami khong duoc, vui long xem phong wayoushitsu". Chon 2.'},
+  g26:{s:'grammar',t:'Dokkai',sh:'Q26 Chikatetsu',tx:'Q26: Tokyo no chikatetsu wa dono you na kuufuu wo shite iru to itte iru ka?',op:['Eki to eki no aida ni saka wo tsukuri enerugii ga sukunaku naru you ni','Sukunai enerugii de saka wo hashireru densha wo shiyou','Saka wo herashite sukunai enerugii de supido ga deru you ni','Hashiru densha no kazu wo sukunaku shite enerugii wo herashite iru'],a:1,ex:'Dap an 1. Van ban: ga nong (eki=canh)-> khoang giua sau (=saka). Di ra: xuong doc->tu tang toc. Den noi: len doc->tu giam toc. Tiet kiem nang luong. Tao "saka" (doc), khong phai giam bo. Chon 1.'},
+  g27:{s:'grammar',t:'Dokkai',sh:'Q27 Supa 1',tx:'Q27: "Sou omotte imashita" towa, dou omotte ita no ka?',op:['Suupaa wa hitsuyouna mono wo kau dake no basho da','Ooku no hito ni totte hitsuyouna mono wo utte iru basho ga suupaa da','Ooku no hito ga kaimono dekiru suupaa ga, kinjo ni motto hitsuyou da','Kinjo no suupaa wa shuu ni 2,3 kai iku basho da'],a:1,ex:'Dap an 1. Cau dau van ban: "Suupaa wa ooku no hito ni totte, hitsuyouna mono wo kau dake no basho kamoshiremasen"->nghi "chi la noi mua do can thiet". Chon 1.'},
+  g28:{s:'grammar',t:'Dokkai',sh:'Q28 Supa 2',tx:'Q28: "Yamete shimaimashita" towa, nani wo yameta no ka?',op:['Otto to futari de kinjo no suupaa ni iku koto','Musuko ni intaanetto suupaa de kaimono wo shite morau koto','Intaanetto suupaa no tsukaikata wo musuko ni oshiete morau koto','Musuko ga shoukai shite kureta intaanetto suupaa wo riyou suru koto'],a:4,ex:'Dap an 4. Qua trinh: musuko ga shoukai->tsukatte mita->1 tháng de yameta. "Yameta" la viec dung dung Internet supermarket. Khong phai dung di sieu thi (van tiep tuc). Chon 4.'},
+  g29:{s:'grammar',t:'Dokkai',sh:'Q29 Supa 3',tx:'Q29: "Watashi" wa ima, donna koto wo taisetsu da to omotte iru ka?',op:['Otto to musuko to issho ni, kazoku minna de kinjo no suupaa de kaimono','Otto to soudan shinagara, intaanetto suupaa de kaitai mono wo erabu','Kinjo no suupaa de otto to issho ni jitsubutsu wo mite, shinamono wo erandari sagashitari suru','Oishisou na shinamono ya shinsen na shinamono ga takusan aru suupaa wo, otto to sagasu'],a:3,ex:'Dap an 3. Van ban: "mise ni narande iru yasai wo te ni totte...erandari, shinsen na sakana wo mitsuketa ri suru no ga, tanoshikatta"->day la thoi gian quy gia. Khong co musuko. Chon 3.'},
+  g30:{s:'grammar',t:'Dokkai',sh:'Q30 Bunsangata 1',tx:'Q30: Saikin, Nihon de eigyou dekiru you ni natta no wa, dono you na hoteru ka?',op:['Tomaru heya to uketsuke wa aru ga, shokuji kaijou ga nai hoteru','Tomaru heya dake ga atte, uketsuke ya shokuji kaijou ga nai hoteru','Tomaru heya ya uketsuke, shokuji kaijou nado ga, onaji tatemono no naka ni aru hoteru','Tomaru heya ya uketsuke, shokuji kaijou nado ga, sorezore chigau tatemono ni aru hoteru'],a:4,ex:'Dap an 4. Van ban: "kakuheya ya uketsuke nado ga betsubi no tatemono ni bunsan shite ite mo, hitotsu no hoteru toshite eigyou dekiru you ni natta"=cac phong, le tan, khu an uong o cac toa nha khac nhau. Chon 4.'},
+  g31:{s:'grammar',t:'Dokkai',sh:'Q31 Bunsangata 2',tx:'Q31: Bunsangata hoteru wa, dono you na kyaku ni atte iru ka?',op:['Tomaru heya, uketsuke, shokuji kaijou no idou wo narubeku sukunaku shitai kyaku','Rekishi aru machi ni kyoumi wa aru ga, tomaru no wa saikin taterareta tatemono ga ii kyaku','Rekishi aru machi wo aruki mawattari, fudan no machi no yousu wo mitari shitai kyaku','Hoteru ni tomatte iru hoka no kyaku tachi to no koryuu wo taisetsu ni shitai kyaku'],a:3,ex:'Dap an 3. Van ban: "machi no nichijou wo mitari, sono machi rashii mise wo mitsuketari shitai kyaku ni totte wa, kore ga kachi ni naru"->khach thich kham pha pho. Chon 3.'},
+  g32:{s:'grammar',t:'Dokkai',sh:'Q32 Bunsangata 3',tx:'Q32: Kono bunshou zentai no teema wa nani ka?',op:['Rekishi no aru hoteru to sono kachi','Atarashii taipu no hoteru to sono yosa','Nihon no hoteru ni tomaru kyaku no koudou no henka','Atarashiku taterareta hoteru ga machi no keizai ni ataeru eikyou'],a:2,ex:'Dap an 2. Chu de: giai thich khai niem "Bunsangata Hoteru" (kieu moi) va neu cac diem tot (lich su, kinh te, trai nghiem cho khach). Khong phai "hoteru co lich su" ma la "kieu hoteru moi". Chon 2.'},
+  g33:{s:'grammar',t:'Dokkai',sh:'Q33 Ehon 1',tx:'Q33: "Watashi" wa, naze ehon no yomikikase katsudou ni sanka suru koto ni shita no ka?',op:['Ii ehon ga mitsukararenakute komatte iru sensei wo tasuketa katta','Ehon wo yomu koto ni natte komatte iru tsuma wo tasuketa katta','Watashi ga ehon wo yondara musume ga yorokobu to, tsuma ga itta kara','Kodomotachi ni ehon no yosa wo tsutaetakatta kara'],a:3,ex:'Dap an 3. Van ban: tsuma ga "anata ga ittara kitto Kyoko wa yorokobu yo" to itta -> "musume ga yorokobu nara to omotte, yatte miru koto ni shita". Ly do truc tiep: loi cua vo. Chon 3.'},
+  g34:{s:'grammar',t:'Dokkai',sh:'Q34 Ehon 2',tx:'Q34: "Musume no mae de renshuu shite yokatta" to omotta no wa naze ka?',op:['Musume ga ehon no naiyou ni kyoumi wo motte kureta kara','Chigau ehon no hou ga ii to musume ga itte kureta kara','Gakkou de no yomikikase no yarikata wo shiru koto ga dekita kara','Hon no yoko kara demo ji ga umaku yomeru houhou wo musume ga oshiete kureta kara'],a:3,ex:'Dap an 3. Van ban: renshuu chuu, musume ga "hon wo kodomotachi ni mukete yomu" houhou wo oshiete kureta->day la cach doc o truong. Biet truoc nen tot. Khong phai phuong phap doc ngang. Chon 3.'},
+  g35:{s:'grammar',t:'Dokkai',sh:'Q35 Ehon 3',tx:'Q35: "Yosou" towa, dono you na yosou ka?',op:['Sensei ga eranda ehon nanode kodomotachi wa kyoumi wo motsu darou','Seito no oya ga eranda ehon nanode kodomotachi mo suki ni naru darou','Ima no kodomotachi ni ninki ga aru ehon nanode kodomotachi wa yorokobu darou','Jibun ga mukashi yonde totemo omoshirokatta ehon nanode ima no kodomotachi mo kyoumi wo motsu darou'],a:4,ex:'Dap an 4. Van ban: "watashi ga kodomo no koro ni sukidatta hon wo eranda. Totemo omoshiroi hon datta kara, ima no kodomotachi mo kyoumi wo motte kureru to omotta"->day la "yosou". Ngay hom do "minna ga omoshirokatta to itta"=yosou ga atatta. Chon 4.'},
+  g36:{s:'grammar',t:'Dokkai',sh:'Q36 Ehon 4',tx:'Q36: "Musume wa kitto ureshikatta no darou" to omotta no wa naze ka?',op:['Musume ga "omoshikatta" to itte kureta kara','Musume ga hoka no kodomotachi no kansou wo ureshisou ni tsutaete kureta kara','Musume ga isu wo youi shite watashi wo kangei shite ita to wakatta kara','Musume no kotoba kara, mata yomikikase ni kite hoshii to iu kimochi wo kanjita kara'],a:4,ex:'Dap an 4. Van ban: musume ga "tsugi wa suwatte ne" to itta. "Tsugi wa" = muon anh den lan nua -> chung to con gai vui va muon bo tiep tuc den. Chon 4.'},
+  g37:{s:'grammar',t:'Dokkai',sh:'Q37 Toshokan 1',tx:'Q37: Moriyama-san wa suiyoubi ka doyoubi no 17ji ikkou ni, onaji seki wo 2jikan riyou shitai. Nan youbi ni dono seki?',op:['Suiyoubi ni, dokushoseki A','Suiyoubi ni, dokushoseki A ka dokushoseki B','Doyoubi ni, dokushoseki A','Doyoubi ni, dokushoseki A ka dokushoseki B'],a:3,ex:'Dap an 3. Doyoubi: dóng cua 18h. Tu 17h chi con 1 tieng. Dokushoseki A: khong gioi han thoi gian, nen van dung duoc. Dokushoseki B: toi da 1.5 tieng=OK tu 17h. Suiyoubi (heibi): dong cua 20h, 17-19h=2 tieng, ca A va B deu OK. Nhung thu 7, chi co A la khong co gioi han, B 1.5 tieng tu 17h=18:30(qua gio dong cua). Nen thu 7, chi dung A. Chon 3.'},
+  g38:{s:'grammar',t:'Dokkai',sh:'Q38 Toshokan 2',tx:'Q38: Koukousei no Kurea-san wa heijitsu 15ji goro kara 1 jikan, jibun no PC de benkyou shitai. Dou sureba ii ka?',op:['Kashidashi card wo motte uketsuke ni iki, dokushoseki B ka gakushuseki no moushikomi','Kashidashi card wo motte uketsuke ni iki, gakushuseki ka intaanetto seki no moushikomi','Dokushoseki B ka gakushuseki riyou. Moushikomi wa hitsuyou nai','Gakushuseki ka intaanetto seki riyou. Moushikomi wa hitsuyou nai'],a:1,ex:'Dap an 1. Dieu kien: dung PC ca nhan->B hoac Gakushu (Internet chi dung PC cua thu vien). La Koukou sei (hoc sinh)->Gakushuseki OK. Can dang ky: B va Gakushu deu can the va dang ky o le tan. Internet seki cung can. Do do: cam the den le tan, dang ky B hoac Gakushu. Chon 1.'},
+  l1:{s:'listening',t:'Mon1',sh:'Q1-1 Yoyaku',tx:'[Mon1-1] Mise in to kyaku no kaiwa. Yoyaku tori naosu jikan wa?',op:['Kyo no gozen 10ji','Kyo no gogo 6ji','Ashita no gozen 10ji','Asatte no gogo 6ji'],a:3,ex:'Dap an 3: Ashita no gozen 10ji. Hom nay day het cho->doi sang ngay mai sang. Chu y bieu hien thoi gian: gozen(sang)/gogo(chieu), hom nay/ngay mai/ngay kia.'},
+  l2:{s:'listening',t:'Mon1',sh:'Q1-2 Shigoto',tx:'[Mon1-2] Ten in ga saisho ni shinakereba naranai koto wa?',op:['Shinshouhin wo chekku suru','Souko wo seiri suru','Tana wo souji suru','Hagaki wo dashi ni iku'],a:2,ex:'Dap an 2: Souko wo seiri suru. Mon 1 hoi "viec dau tien". Chu y thu tu: "mazu~, sorekara~, saigo ni~".'},
+  l3:{s:'listening',t:'Mon1',sh:'Q1-3 Chizu',tx:'[Mon1-3] Chizu wo minagara. A kara U no jun wa?',op:['A->I->U','U->I->A','I->U->A','I->A->U'],a:1,ex:'Dap an 1: A->I->U. Bai tap ban do: chu y vi tri A(Aozora kai), I(Hikari shoten), U(Minato Hotel) va huong chi dan.'},
+  l4:{s:'listening',t:'Mon1',sh:'Q1-4 Saisho',tx:'[Mon1-4] Josei ga saisho ni suru koto wa?',op:['Hoteru ni meeru suru','Hoteru ni denwa suru','Kyanseru ryou wo furikomu','Minna ni renraku suru'],a:2,ex:'Dap an 2: Hoteru ni denwa suru. Khi huy dat phong: truoc tien goi cho khach san. Sau do moi xu ly cac thu tuc khac.'},
+  l5:{s:'listening',t:'Mon1',sh:'Q1-5 Gakusei',tx:'[Mon1-5] Gakusei ga saisho ni suru koto wa?',op:['Shiryou wo meeru de sensei ni okuru','Shiryou wo insatsu suru','Hon wo toshokan de kariru','Hon wo matte kuru'],a:3,ex:'Dap an 3: Hon wo toshokan de kariru. Quy trinh: muon viet bao cao -> truoc tien muon sach o thu vien -> sau do in tai lieu.'},
+  l6:{s:'listening',t:'Mon1',sh:'Q1-6 Arubaito',tx:'[Mon1-6] Arubaito no josei ga saisho ni suru koto wa?',op:['Seifuku ni kigaeru','Chirashi wo kubaru','Ringo no pai wo shishoku suru','Shouhin wo hako ni tsumeru'],a:1,ex:'Dap an 1: Seifuku ni kigaeru. Khi bat dau lam them: dau tien la thay dong phuc. Sau do moi lam cac cong viec.'},
+  l7:{s:'listening',t:'Mon2',sh:'Q2-1 Present',tx:'[Mon2-1] Akachan he no purezento de, josei ga ichiban ii to omotta no wa?',op:['Fudan tsukaeru taoru','Ii kodomo fuku','Ooki ku natte mo yomeru ehon','Kazoku ga yorokobu tabemono'],a:3,ex:'Dap an 3: Ehon. Co the su dung lau dai khi lon len. Mon 2: hieu ly do lua chon. Ehon=co the doc mai theo nam thang.'},
+  l8:{s:'listening',t:'Mon2',sh:'Q2-2 Nemurenai',tx:'[Mon2-2] Josei ga nemurenai ichiban no gen in wa?',op:['Heya ga atatakasugiru','Neru mae ni pasokon wo tsukatte iru','Heya ga akarui','Makura ga takasugiru'],a:2,ex:'Dap an 2: Pasokon. Anh sang xanh (blue light) tu man hinh may tinh gay roi loan giac ngu. Day la nguyen nhan chinh.'},
+  l9:{s:'listening',t:'Mon2',sh:'Q2-3 Mo',tx:'[Mon2-3] Umi no ikimono no kenkyuu de, mo ga yakutatsu no wa donna koto?',op:['Keshouhin wo tsukuru','Sakana wo sodateru','Denki wo tsukuru','Ie wo atatameru'],a:3,ex:'Dap an 3: Denki wo tsukuru. Tao bien (algae) co the dung de san xuat nhien lieu sinh hoc va dien nang.'},
+  l10:{s:'listening',t:'Mon2',sh:'Q2-4 Tenki',tx:'[Mon2-4] Ashita no tenki wa dou desu ka?',op:['Yoku harete atatakai','Ame ga futte samui','Ame ga furu ga atatakai','Yoku hareru ga samui'],a:4,ex:'Dap an 4: Nang nhung lanh. Chu y: thoi tiet(nang/mua) va nhiet do(am/lanh) la hai thong tin khac nhau. "~ga~" la nghich chieu.'},
+  l11:{s:'listening',t:'Mon2',sh:'Q2-5 Bara',tx:'[Mon2-5] Josei wa donna bara wo kaitai to omotte imasu ka?',op:['Iro ya katachi ga suki na bara','Kaori ga suki na bara','Sodateru kankyou ni au bara','Sewa ni jikan ga kakaranai bara'],a:3,ex:'Dap an 3: Moi truong phu hop. Khong phai ngoai hinh, huong hay cong cham soc ma la "phu hop voi moi truong nuoi trong" la dieu quan trong nhat.'},
+  l12:{s:'listening',t:'Mon2',sh:'Q2-6 Keeki',tx:'[Mon2-6] Ichigo no keeki ga amari urenakatta riyuu wa?',op:['Nedan ga takai kara','Kion ga hikukatta kara','Ichigo ga amari haitte inai kara','Senden ga tarinakatta kara'],a:2,ex:'Dap an 2: Nhiet do thap. Nhiet do thap -> nguoi it ra ngoai / it muon an banh lanh -> it mua. "~kara / node / tame" la bieu hien ly do.'},
+  l13:{s:'listening',t:'Mon3',sh:'Q3-1 Sougou',tx:'[Mon3-1] Futari no kaiwa. Kono kaiwa wa omoni nani ni tsuite hanashite iru ka?',op:['Densha ga suki na riyuu','Atarashii densha no shoukai','Densha de ryokou suru keikaku','Densha no omoide ni tsuite'],a:4,ex:'Dap an 4: Ve nhung ky niem voi tau. Mon 3: nam toan bo chu de. Neu nhieu "mukashi~datta / kodomo no koro~" la "omoide" (ky niem).'},
+  l14:{s:'listening',t:'Mon4',sh:'Q4-1 Copy',tx:'[Mon4-1] Kopii ki wo tsukatte iru hito ni hanashikakeru toki, nan to iimasu ka?',op:['Kopii wo tsukatte mo ii desu ka','Sukoshi matte itadakemasu ka','Ato dono kurai kakarimasu ka','Sumimasen, tsugi tsukatte mo ii desu ka'],a:4,ex:'Dap an 4: "Sumimasen, tsugi tsukatte mo ii desu ka?" Mon 4: cach noi phu hop nhat. Muon xep hang dung may in->hoi "co the dung tiep theo khong?". Bat dau bang "sumimasen" rat tu te.'},
+  l15:{s:'listening',t:'Mon4',sh:'Q4-2 Denki',tx:'[Mon4-2] Denki ten de ten in ni koe wo kakeru toki (kyaku toshite), nan to iimasu ka?',op:['Kore wa doko ni arimasu ka','Kono kaato wo tsukatte mo ii desu ka','Kore ni tsuite oshiete itadakemasu ka','Kono shouhin wo misete itadakemasu ka'],a:3,ex:'Dap an 3: "Kore ni tsuite oshiete itadakemasu ka?" Muon biet thong tin san pham -> hoi "vui long giai thich cho toi". "~te itadakemasu ka" la mau hoi lich su N3.'},
+  l16:{s:'listening',t:'Mon4',sh:'Q4-3 Tomodachi',tx:'[Mon4-3] Tomodachi no ie wo deru toki, tomodachi no haha ni nan to iimasu ka?',op:['Ojama shimashita','Arigatou gozaimashita','Mata kimasu','Shitsurei shimasu'],a:1,ex:'Dap an 1: "Ojama shimashita." Khi roi khoi nha nguoi khac: "Ojama shimasu(khi den)/Ojama shimashita(khi ve)". "Shitsurei shimasu" dung trong cong viec.'},
+  l17:{s:'listening',t:'Mon4',sh:'Q4-4 Hotel',tx:'[Mon4-4] Hoteru ni chekku in suru toki (kyaku toshite), nan to iimasu ka?',op:['Yoyaku shita mono desu ga','Heya wo misete kudasai','Chekku in shite kudasai','Tomari tai desu'],a:1,ex:'Dap an 1: "Yoyaku shita mono desu ga." Mau noi khi check-in: "Toi la nguoi da dat phong". "~mono desu ga" la cach gioi thieu lich su. "Chekku in shite kudasai" la ra lenh->that礼.'},
+  l18:{s:'listening',t:'Mon5',sh:'Q5-1 Henji',tx:'[Mon5-1] "Saikin, dou desu ka?" ni taisuru henii wa?',op:['Okagesama de genki desu','Hai, sou desu','Sukoshi mae ni kimashita'],a:1,ex:'Dap an 1: "Okagesama de genki desu." "Dou desu ka"=hoi tham suc khoe. "Okagesama de"=nho on cua ban. Dap lai chao hoi suc khoe = chon 1.'},
+  l19:{s:'listening',t:'Mon5',sh:'Q5-2 Henji',tx:'[Mon5-2] "Kono nimotsu, motte moraemasu ka?" ni taisuru henji wa?',op:['Iie, motte imasen','Hai, mochiron desu','Nimotsu wa asoko desu'],a:2,ex:'Dap an 2: "Hai, mochiron desu." Nhan loi nho mang hanh ly. "Mochiron"=tat nhien la duoc. "Motte imasen"=khong mang (hieu nham), "Asoko desu"=khong lien quan.'},
+  l20:{s:'listening',t:'Mon5',sh:'Q5-3 Henji',tx:'[Mon5-3] "Mou sukoshi hayaku hanashite moraemasu ka?" ni taisuru henji wa?',op:['Hai, isogimasu','Sumimasen, yukkuri hanashimasu ne','A, mou osoi desu ne'],a:2,ex:'Dap an 2: "Sumimasen, yukkuri hanashimasu ne." Luu y: "hayaku" o day=nhanh hon (noi qua nhanh)->yeu cau noi cham lai. Nen tra loi "yukkuri(cham) hanashimasu". "Isogimasu"=se gap=hieu sai.'}
 };
 
+
+const TEACHER_PASS='teacher2024';
+let refreshInterval=null, currentWrongList=[], currentWrongIdx=0;
+let scoreC=null,sectionC=null,timeC=null,mistakeC=null;
+
 function teacherLogin(){
-  const pw=document.getElementById('pwInput').value;
-  if(pw===TEACHER_PASS){
-    isLoggedIn=true;
+  if(document.getElementById('pwInput').value===TEACHER_PASS){
     document.getElementById('loginArea').style.display='none';
     document.getElementById('headerInfo').style.display='block';
     document.getElementById('dashboard').style.display='block';
-    startAutoRefresh();
+    refreshInterval=setInterval(refreshData,10000);
     refreshData();
-  } else {
-    alert('Mật khẩu không đúng!');
-  }
+  } else alert('Mat khau khong dung!');
 }
 function logout(){location.reload();}
-function clearAllData(){
-  if(confirm('Xóa toàn bộ dữ liệu kết quả?')){
-    localStorage.removeItem('jlptResults');
-    refreshData();
-    alert('Đã xóa!');
-  }
-}
-
-function startAutoRefresh(){
-  refreshInterval=setInterval(()=>refreshData(),10000);
-}
+function clearAllData(){if(confirm('Xoa toan bo du lieu?')){localStorage.removeItem('jlptResults');refreshData();alert('Da xoa!');}}
+function getResults(){try{return JSON.parse(localStorage.getItem('jlptResults')||'[]');}catch{return [];}}
 function refreshData(){
-  const now=new Date();
-  document.getElementById('lastRefresh').textContent='Cập nhật: '+now.getHours()+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
-  const tab=document.querySelector('.tab.active');
-  const tabId=tab?tab.textContent.trim():'';
+  const n=new Date();
+  document.getElementById('lastRefresh').textContent='Cap nhat: '+n.getHours()+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
   renderOverview();
-  const activeTab=document.querySelector('[id^=tab-]:not([style*="none"])');
-  if(activeTab){
-    if(activeTab.id==='tab-students') renderStudentTable();
-    if(activeTab.id==='tab-mistakes') renderMistakes();
-    if(activeTab.id==='tab-realtime') renderRealtime();
-  }
+  const a=document.querySelector('[id^=tab-]:not([style*="none"])');
+  if(a){if(a.id==='tab-students')renderStudentTable();if(a.id==='tab-mistakes')renderMistakes();if(a.id==='tab-realtime')renderRealtime();}
 }
-
-function getResults(){
-  try{return JSON.parse(localStorage.getItem('jlptResults')||'[]');}catch{return [];}
-}
-
-function showTab(t){
-  document.querySelectorAll('[id^=tab-]').forEach(el=>el.style.display='none');
+function showTab(t,el){
+  document.querySelectorAll('[id^=tab-]').forEach(x=>x.style.display='none');
   document.getElementById('tab-'+t).style.display='block';
-  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
-  event.target.classList.add('active');
-  if(t==='students') renderStudentTable();
-  if(t==='mistakes') renderMistakes();
-  if(t==='realtime') renderRealtime();
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  if(t==='students')renderStudentTable();
+  if(t==='mistakes')renderMistakes();
+  if(t==='realtime')renderRealtime();
 }
-
-function renderOverview(){
-  const results=getResults();
-  if(!results.length){
-    document.getElementById('totalStudents').textContent='0';
-    document.getElementById('passRate').textContent='0%';
-    document.getElementById('avgScore').textContent='0';
-    document.getElementById('mostWrongQ').textContent='-';
-    return;
-  }
-  const total=results.length;
-  const passed=results.filter(r=>r.passed).length;
-  const avgScore=Math.round(results.reduce((s,r)=>s+(r.score||0),0)/total);
-  const passRate=Math.round(passed/total*100);
-  document.getElementById('totalStudents').textContent=total;
-  document.getElementById('passRate').textContent=passRate+'%';
-  document.getElementById('avgScore').textContent=avgScore+'点';
-
-  const wrongCounts=getWrongCounts(results);
-  const topWrong=Object.entries(wrongCounts).sort((a,b)=>b[1]-a[1])[0];
-  if(topWrong && QUESTION_META[topWrong[0]]){
-    document.getElementById('mostWrongQ').textContent=QUESTION_META[topWrong[0]].short;
-  }
-
-  renderScoreChart(results);
-  renderSectionChart(results);
-  renderTimeChart(results);
-}
-
-function renderScoreChart(results){
-  const bins=[0,0,0,0,0,0,0,0,0,0];
-  results.forEach(r=>{
-    const pct=r.pct||0;
-    const i=Math.min(9,Math.floor(pct/10));
-    bins[i]++;
-  });
-  const labels=['0-9%','10-19%','20-29%','30-39%','40-49%','50-59%','60-69%','70-79%','80-89%','90-100%'];
-  const colors=bins.map((_,i)=>i>=6?'#2ecc71':'#e74c3c');
-  if(scoreChartInst){scoreChartInst.destroy();}
-  const ctx=document.getElementById('scoreChart').getContext('2d');
-  scoreChartInst=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Số HS',data:bins,backgroundColor:colors,borderColor:colors,borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#aaa',font:{size:10}},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#aaa',stepSize:1},grid:{color:'rgba(255,255,255,0.05)'}}}}});
-}
-
-function renderSectionChart(results){
-  const sections={vocab:{c:0,t:0},grammar:{c:0,t:0},listening:{c:0,t:0}};
-  results.forEach(r=>{
-    const sec=r.section==='all'?null:r.section;
-    if(sec && sections[sec]){
-      sections[sec].c+=r.correct||0;
-      sections[sec].t+=(r.correct||0)+(r.wrong||0);
-    }
-  });
-  const labels=['文字・語彙','文法・読解','聴解'];
-  const pcts=Object.values(sections).map(s=>s.t?Math.round(s.c/s.t*100):0);
-  if(sectionChartInst){sectionChartInst.destroy();}
-  const ctx=document.getElementById('sectionChart').getContext('2d');
-  sectionChartInst=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:pcts,backgroundColor:['#3498db','#9b59b6','#2ecc71'],borderColor:'transparent',borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#aaa',font:{size:11},boxWidth:12}}}}});
-}
-
-function renderTimeChart(results){
-  const hourBins=new Array(24).fill(0);
-  results.forEach(r=>{
-    const h=new Date(r.timestamp||Date.now()).getHours();
-    hourBins[h]++;
-  });
-  const labels=Array.from({length:24},(_,i)=>i+'h');
-  if(timeChartInst){timeChartInst.destroy();}
-  const ctx=document.getElementById('timeChart').getContext('2d');
-  timeChartInst=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Nộp bài',data:hourBins,borderColor:'#ff6b8a',backgroundColor:'rgba(255,107,138,0.15)',tension:0.4,fill:true,pointRadius:3,pointBackgroundColor:'#ff6b8a'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#aaa',font:{size:10},maxRotation:0},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#aaa',stepSize:1},grid:{color:'rgba(255,255,255,0.05)'}}}}});
-}
-
-function renderStudentTable(){
-  const results=getResults();
-  const tbody=document.getElementById('studentTbody');
-  const filterSec=document.getElementById('filterSection').value;
-  const sortBy=document.getElementById('sortBy').value;
-  let data=filterSec==='all'?results:results.filter(r=>r.section===filterSec);
-  if(sortBy==='score') data.sort((a,b)=>(b.score||0)-(a.score||0));
-  else if(sortBy==='name') data.sort((a,b)=>a.name.localeCompare(b.name));
-  else data.sort((a,b)=>new Date(b.timestamp||0)-new Date(a.timestamp||0));
-
-  if(!data.length){tbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:#aaa;padding:2rem">Chưa có dữ liệu</td></tr>';return;}
-  
-  const SECTION_NAMES={vocab:'文字・語彙',grammar:'文法・読解',listening:'聴解',all:'全部'};
-  tbody.innerHTML=data.map((r,i)=>{
-    const em=Math.floor((r.elapsed||0)/60),es=(r.elapsed||0)%60;
-    return `<tr>
-      <td>${i+1}</td>
-      <td><b style="color:#ddd">${r.name||'匿名'}</b></td>
-      <td><span class="badge blue">${r.class||'-'}</span></td>
-      <td>${SECTION_NAMES[r.section]||r.section}</td>
-      <td><b style="color:#ff91a4">${r.score||0}/${r.maxScore||60}</b></td>
-      <td style="color:#2ecc71">${r.correct||0}</td>
-      <td style="color:#e74c3c">${r.wrong||0}</td>
-      <td>${r.pct||0}%</td>
-      <td><span class="badge ${r.passed?'pass':'fail'}">${r.passed?'合格':'不合格'}</span></td>
-      <td style="color:#aaa">${em}:${String(es).padStart(2,'0')}</td>
-    </tr>`;
-  }).join('');
-}
-
 function getWrongCounts(results){
-  const counts={};
-  results.forEach(r=>{
-    if(r.answers){
-      Object.entries(r.answers).forEach(([qid,ans])=>{
-        if(!ans.correct){counts[qid]=(counts[qid]||0)+1;}
-      });
-    }
-  });
-  return counts;
+  const c={};
+  results.forEach(r=>{if(r.answers)Object.entries(r.answers).forEach(([q,a])=>{if(!a.correct)c[q]=(c[q]||0)+1;});});
+  return c;
 }
-
+function renderOverview(){
+  const R=getResults();
+  if(!R.length){['totalStudents','passRate','avgScore','mostWrongQ'].forEach(id=>document.getElementById(id).textContent='0');return;}
+  const total=R.length, passed=R.filter(r=>r.passed).length;
+  document.getElementById('totalStudents').textContent=total;
+  document.getElementById('passRate').textContent=Math.round(passed/total*100)+'%';
+  document.getElementById('avgScore').textContent=Math.round(R.reduce((s,r)=>s+(r.score||0),0)/total)+'ten';
+  const wc=getWrongCounts(R), top=Object.entries(wc).sort((a,b)=>b[1]-a[1])[0];
+  if(top&&QUESTIONS_DB[top[0]])document.getElementById('mostWrongQ').textContent=QUESTIONS_DB[top[0]].sh;
+  const bins=new Array(10).fill(0);
+  R.forEach(r=>bins[Math.min(9,Math.floor((r.pct||0)/10))]++);
+  const lbs=['0-9%','10-19%','20-29%','30-39%','40-49%','50-59%','60-69%','70-79%','80-89%','90-100%'];
+  if(scoreC)scoreC.destroy();
+  scoreC=new Chart(document.getElementById('scoreChart').getContext('2d'),{type:'bar',data:{labels:lbs,datasets:[{data:bins,backgroundColor:bins.map((_,i)=>i>=6?'#2ecc71':'#e74c3c'),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#aaa',font:{size:10}},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#aaa',stepSize:1},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+  const sv={vocab:{c:0,t:0},grammar:{c:0,t:0},listening:{c:0,t:0}};
+  R.forEach(r=>{const s=r.section!=='all'?r.section:null;if(s&&sv[s]){sv[s].c+=r.correct||0;sv[s].t+=(r.correct||0)+(r.wrong||0);}});
+  if(sectionC)sectionC.destroy();
+  sectionC=new Chart(document.getElementById('sectionChart').getContext('2d'),{type:'doughnut',data:{labels:['Van tu','Ngu phap','Nghe'],datasets:[{data:Object.values(sv).map(x=>x.t?Math.round(x.c/x.t*100):0),backgroundColor:['#3498db','#9b59b6','#2ecc71'],borderColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#aaa',font:{size:11},boxWidth:12}}}}});
+  const h=new Array(24).fill(0);
+  R.forEach(r=>h[new Date(r.timestamp||Date.now()).getHours()]++);
+  if(timeC)timeC.destroy();
+  timeC=new Chart(document.getElementById('timeChart').getContext('2d'),{type:'line',data:{labels:Array.from({length:24},(_,i)=>i+'h'),datasets:[{data:h,borderColor:'#ff6b8a',backgroundColor:'rgba(255,107,138,0.15)',tension:0.4,fill:true,pointRadius:3,pointBackgroundColor:'#ff6b8a'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#aaa',font:{size:10},maxRotation:0},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#aaa',stepSize:1},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+}
+function renderStudentTable(){
+  const R=getResults(), fs=document.getElementById('filterSection').value, sb=document.getElementById('sortBy').value;
+  let D=fs==='all'?R:R.filter(r=>r.section===fs);
+  if(sb==='score')D.sort((a,b)=>(b.score||0)-(a.score||0));else if(sb==='name')D.sort((a,b)=>a.name.localeCompare(b.name));else D.sort((a,b)=>new Date(b.timestamp||0)-new Date(a.timestamp||0));
+  const SN={vocab:'Van tu',grammar:'Ngu phap',listening:'Nghe',all:'Toan bo'};
+  const tb=document.getElementById('studentTbody');
+  if(!D.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#aaa;padding:2rem">Chua co du lieu</td></tr>';return;}
+  tb.innerHTML=D.map((r,i)=>{const em=Math.floor((r.elapsed||0)/60),es=(r.elapsed||0)%60;return `<tr><td>${i+1}</td><td><b style="color:#ddd">${r.name||'?'}</b></td><td><span class="badge blue">${r.class||'-'}</span></td><td>${SN[r.section]||r.section}</td><td><b style="color:#ff91a4">${r.score||0}/${r.maxScore||60}</b></td><td style="color:#2ecc71">${r.correct||0}</td><td style="color:#e74c3c">${r.wrong||0}</td><td>${r.pct||0}%</td><td><span class="badge ${r.passed?'pass':'fail'}">${r.passed?'Dat':'Khong dat'}</span></td><td style="color:#aaa">${em}:${String(es).padStart(2,'0')}</td></tr>`;}).join('');
+}
 function renderMistakes(){
-  const results=getResults();
-  if(!results.length){
-    document.getElementById('wrongList').innerHTML='<div class="no-data">Chưa có dữ liệu</div>';
-    return;
-  }
-  const counts=getWrongCounts(results);
-  const total=results.length;
+  const R=getResults();
+  if(!R.length){document.getElementById('wrongList').innerHTML='<div class="no-data">Chua co du lieu</div>';document.getElementById('mistakeDetailTbody').innerHTML='';return;}
+  const counts=getWrongCounts(R), total=R.length;
   const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-
-  // Top 10 wrong
-  const top10=sorted.slice(0,10);
-  document.getElementById('wrongList').innerHTML=top10.map(([qid,cnt])=>{
-    const meta=QUESTION_META[qid]||{short:qid,type:'-'};
+  currentWrongList=sorted.map(([qid])=>qid);
+  const SN={vocab:'Van tu',grammar:'Ngu phap',listening:'Nghe'};
+  document.getElementById('wrongList').innerHTML=sorted.slice(0,10).map(([qid,cnt],idx)=>{
+    const q=QUESTIONS_DB[qid];if(!q)return '';
     const pct=Math.round(cnt/total*100);
-    return `<div class="wrong-item">
-      <div style="flex:1"><div style="color:#ddd;font-size:0.85rem">${meta.short}</div>
-      <div style="color:#aaa;font-size:0.75rem">${meta.type}</div>
-      <div class="wrong-bar"><div class="wrong-fill" style="width:${pct}%"></div></div></div>
-      <div style="text-align:right;margin-left:1rem"><div style="color:#e74c3c;font-weight:700">${pct}%</div><div style="color:#aaa;font-size:0.75rem">${cnt}/${total} HS</div></div>
+    return `<div class="wrong-item" onclick="openModal('${qid}',${idx})">
+      <div style="flex:1">
+        <div style="color:#ddd;font-size:0.85rem;font-weight:600">${q.sh}</div>
+        <div style="color:#aaa;font-size:0.75rem;margin:2px 0">${q.t}</div>
+        <div class="wrong-bar"><div class="wrong-fill" style="width:${pct}%"></div></div>
+        <div style="font-size:0.72rem;color:#ff91a4;margin-top:3px">&#128070; Nhan de xem cau hoi & chua bai</div>
+      </div>
+      <div style="text-align:right;margin-left:1rem;flex-shrink:0">
+        <div style="color:#e74c3c;font-weight:700;font-size:1.1rem">${pct}%</div>
+        <div style="color:#aaa;font-size:0.75rem">${cnt}/${total}</div>
+      </div>
     </div>`;
   }).join('');
-
-  // Mistake chart by section
-  const sectionWrong={vocab:0,grammar:0,listening:0};
-  sorted.forEach(([qid,cnt])=>{
-    const meta=QUESTION_META[qid];
-    if(meta && sectionWrong[meta.section]!==undefined) sectionWrong[meta.section]+=cnt;
-  });
-  if(mistakeChartInst){mistakeChartInst.destroy();}
-  const ctx=document.getElementById('mistakeChart').getContext('2d');
-  mistakeChartInst=new Chart(ctx,{type:'bar',data:{labels:['文字・語彙','文法・読解','聴解'],datasets:[{label:'Số lỗi',data:Object.values(sectionWrong),backgroundColor:['#3498db','#9b59b6','#e74c3c'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
-
-  // Detail table
-  const tbody=document.getElementById('mistakeDetailTbody');
-  tbody.innerHTML=sorted.map(([qid,cnt])=>{
-    const meta=QUESTION_META[qid]||{short:qid,type:'-',section:'-'};
-    const pct=Math.round(cnt/total*100);
-    const SECTION_NAMES={vocab:'文字・語彙',grammar:'文法・読解',listening:'聴解'};
-    const barColor=pct>=70?'#e74c3c':pct>=40?'#e67e22':'#f1c40f';
-    return `<tr>
-      <td><b style="color:#ff91a4">${meta.short}</b></td>
-      <td>${SECTION_NAMES[meta.section]||meta.section}</td>
-      <td><span class="badge blue">${meta.type}</span></td>
-      <td><span style="color:${barColor};font-weight:700">${pct}%</span></td>
-      <td>${cnt}/${total}</td>
-      <td style="color:#aaa;font-size:0.82rem">Xem câu hỏi trong đề thi</td>
-    </tr>`;
+  const sw={vocab:0,grammar:0,listening:0};
+  sorted.forEach(([qid,cnt])=>{const q=QUESTIONS_DB[qid];if(q&&sw[q.s]!==undefined)sw[q.s]+=cnt;});
+  if(mistakeC)mistakeC.destroy();
+  mistakeC=new Chart(document.getElementById('mistakeChart').getContext('2d'),{type:'bar',data:{labels:['Van tu','Ngu phap','Nghe'],datasets:[{data:Object.values(sw),backgroundColor:['#3498db','#9b59b6','#e74c3c'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+  document.getElementById('mistakeDetailTbody').innerHTML=sorted.map(([qid,cnt],idx)=>{
+    const q=QUESTIONS_DB[qid];if(!q)return '';
+    const pct=Math.round(cnt/total*100), col=pct>=70?'#e74c3c':pct>=40?'#e67e22':'#f1c40f';
+    return `<tr><td><b style="color:#ff91a4">${q.sh}</b></td><td>${SN[q.s]||q.s}</td><td><span class="badge blue">${q.t}</span></td><td><span style="color:${col};font-weight:700">${pct}%</span></td><td>${cnt}/${total}</td><td><button onclick="openModal('${qid}',${idx})" style="background:linear-gradient(135deg,#ff6b8a,#c0392b);border:none;color:#fff;padding:0.3rem 0.8rem;border-radius:6px;cursor:pointer;font-size:0.78rem">Xem & chua bai</button></td></tr>`;
   }).join('');
 }
-
+function openModal(qid,idx){
+  const q=QUESTIONS_DB[qid];if(!q)return;
+  currentWrongIdx=idx;
+  const R=getResults(), total=R.length, wc=getWrongCounts(R), wn=wc[qid]||0, pct=total?Math.round(wn/total*100):0;
+  const choiceMap={};
+  R.forEach(r=>{if(r.answers&&r.answers[qid]&&!r.answers[qid].correct){const c=r.answers[qid].selected;if(!choiceMap[c])choiceMap[c]=[];choiceMap[c].push(r.name);}});
+  const SN={vocab:'VAN TU',grammar:'NGU PHAP',listening:'NGHE'};
+  document.getElementById('modalTitle').textContent=q.sh;
+  document.getElementById('modalTypeBadge').textContent=(SN[q.s]||q.s)+' -- '+q.t;
+  document.getElementById('modalStats').innerHTML=`
+    <div class="modal-stat"><div class="v">${wn}</div><div class="l">HS sai</div></div>
+    <div class="modal-stat"><div class="v">${pct}%</div><div class="l">Ti le sai</div></div>
+    <div class="modal-stat"><div class="v ok">${total-wn}</div><div class="l">HS dung</div></div>
+    <div class="modal-stat"><div class="v ok">${total?Math.round((total-wn)/total*100):0}%</div><div class="l">Ti le dung</div></div>`;
+  document.getElementById('modalQText').innerHTML=q.tx;
+  document.getElementById('modalOpts').innerHTML=q.op.map((o,i)=>`
+    <div class="opt-row ${i+1===q.a?'correct':'neutral'}">
+      <span style="font-weight:700;min-width:22px;color:${i+1===q.a?'#2ecc71':'#aaa'}">${i+1}.</span>
+      <span>${o}</span>
+      ${i+1===q.a?'<span style="margin-left:auto">&#10003; DAP AN DUNG</span>':''}
+    </div>`).join('');
+  document.getElementById('modalExplain').innerHTML=`<h4>&#128161; Giai thich dap an</h4><p>${q.ex}</p>`;
+  let whoHtml=Object.entries(choiceMap).length?Object.entries(choiceMap).map(([sel,names])=>`
+    <div style="margin-bottom:0.6rem">
+      <div style="color:#aaa;font-size:0.78rem;margin-bottom:3px">Chon dap an <span style="color:#e74c3c;font-weight:600">${sel}. ${q.op[sel-1]||''}</span>:</div>
+      ${names.map(n=>`<div class="student-row">&#128100; ${n}</div>`).join('')}
+    </div>`).join(''):'<div style="color:#aaa;font-size:0.85rem">Chua co du lieu hoc sinh hoac tat ca deu dung</div>';
+  document.getElementById('modalWhoWrong').innerHTML=`<h4>&#10060; Hoc sinh chon sai</h4>${whoHtml}`;
+  document.getElementById('modalOverlay').style.display='flex';
+}
+function closeModal(){document.getElementById('modalOverlay').style.display='none';}
+function prevWrongQ(){if(currentWrongIdx>0){currentWrongIdx--;openModal(currentWrongList[currentWrongIdx],currentWrongIdx);}}
+function nextWrongQ(){if(currentWrongIdx<currentWrongList.length-1){currentWrongIdx++;openModal(currentWrongList[currentWrongIdx],currentWrongIdx);}}
 function renderRealtime(){
-  const results=getResults();
-  const list=document.getElementById('realtimeList');
-  const log=document.getElementById('activityLog');
-  
-  if(!results.length){list.innerHTML='<div class="no-data">Đang chờ học sinh làm bài...</div>';return;}
-  
-  const byStudent={};
-  results.forEach(r=>{
-    const key=r.name+'_'+r.class;
-    if(!byStudent[key]||new Date(r.timestamp)>new Date(byStudent[key].timestamp)){byStudent[key]=r;}
-  });
-  const students=Object.values(byStudent).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
-  
-  list.innerHTML=students.map(r=>{
-    const pct=r.pct||0;
-    const barColor=pct>=60?'#2ecc71':pct>=40?'#e67e22':'#e74c3c';
-    const qDone=Object.keys(r.answers||{}).length;
-    const total=r.section==='all'?93:r.section==='vocab'?35:r.section==='grammar'?38:20;
-    const progress=Math.round(qDone/total*100);
-    const em=Math.floor((r.elapsed||0)/60),es=(r.elapsed||0)%60;
+  const R=getResults(), list=document.getElementById('realtimeList'), log=document.getElementById('activityLog');
+  if(!R.length){list.innerHTML='<div class="no-data">Dang cho hoc sinh lam bai...</div>';return;}
+  const bS={};R.forEach(r=>{const k=r.name+'_'+r.class;if(!bS[k]||new Date(r.timestamp)>new Date(bS[k].timestamp))bS[k]=r;});
+  list.innerHTML=Object.values(bS).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)).map(r=>{
+    const pct=r.pct||0, bc=pct>=60?'#2ecc71':pct>=40?'#e67e22':'#e74c3c';
+    const qD=Object.keys(r.answers||{}).length, tQ=r.section==='all'?93:r.section==='vocab'?35:r.section==='grammar'?38:20;
+    const pr=Math.round(qD/tQ*100), em=Math.floor((r.elapsed||0)/60), es=(r.elapsed||0)%60;
     return `<div class="speed-meter">
-      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#ff6b8a,#c0392b);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">👤</div>
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#ff6b8a,#c0392b);display:flex;align-items:center;justify-content:center;flex-shrink:0">&#128100;</div>
       <div style="flex:1;min-width:0">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span class="speed-name" title="${r.name} (${r.class})">${r.name} <span style="color:#aaa;font-size:0.75rem">(${r.class})</span></span>
-          <span style="color:#aaa;font-size:0.75rem">${em}:${String(es).padStart(2,'0')}</span>
+          <span style="font-size:0.85rem;color:#ddd;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.name} <span style="color:#aaa;font-size:0.75rem">(${r.class})</span></span>
+          <span style="color:#aaa;font-size:0.75rem;flex-shrink:0;margin-left:0.5rem">${em}:${String(es).padStart(2,'0')}</span>
         </div>
-        <div style="font-size:0.75rem;color:#aaa;margin-bottom:4px">Tiến độ: ${qDone}/${total} câu (${progress}%)</div>
-        <div class="speed-progress"><div class="speed-fill" style="width:${progress}%;background:${barColor}"></div></div>
+        <div style="font-size:0.75rem;color:#aaa;margin-bottom:4px">Tien do: ${qD}/${tQ} cau (${pr}%)</div>
+        <div style="height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pr}%;background:${bc};border-radius:3px"></div></div>
       </div>
-      <div class="speed-stat">${pct}%<br><span class="badge ${r.passed?'pass':'fail'}" style="font-size:0.65rem">${r.passed?'✅':'❌'}</span></div>
+      <div style="text-align:right;margin-left:1rem;flex-shrink:0"><div style="color:#ff91a4;font-weight:700">${pct}%</div><span class="badge ${r.passed?'pass':'fail'}" style="font-size:0.65rem">${r.passed?'Dat':'Truot'}</span></div>
     </div>`;
   }).join('');
-
-  // Activity log
-  const recent=results.slice(-20).reverse();
-  log.innerHTML=recent.map(r=>{
+  log.innerHTML=R.slice(-20).reverse().map(r=>{
     const t=new Date(r.timestamp);
-    const tStr=t.getHours()+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
-    return `<div style="padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.05)">
-      <span style="color:#ff91a4">[${tStr}]</span> <b style="color:#ddd">${r.name}</b> (${r.class}) nộp bài — 
-      <span style="color:${r.passed?'#2ecc71':'#e74c3c'}">${r.score}/${r.maxScore}点 (${r.pct}%) — ${r.passed?'合格':'不合格'}</span>
-    </div>`;
+    return `<div style="padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.05)"><span style="color:#ff91a4">[${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}]</span> <b style="color:#ddd">${r.name}</b> (${r.class}) -- <span style="color:${r.passed?'#2ecc71':'#e74c3c'}">${r.score}/${r.maxScore}ten (${r.pct}%) -- ${r.passed?'Dat':'Khong dat'}</span></div>`;
   }).join('');
 }
+
 </script>
 </body>
 </html>
