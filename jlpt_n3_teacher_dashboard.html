@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎓 Dashboard Giáo Viên - JLPT N3</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1e;color:#e0e0e0;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a1a3e,#2d1b4e);padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,145,164,0.2)}
+.header h1{color:#ff91a4;font-size:1.5rem}
+.header p{color:#aaa;font-size:0.85rem;margin-top:0.2rem}
+.login-form{display:flex;gap:1rem;align-items:center}
+.login-form input{background:rgba(255,255,255,0.08);border:1px solid rgba(255,145,164,0.4);color:#fff;padding:0.5rem 1rem;border-radius:8px;outline:none;font-size:0.9rem}
+.btn{background:linear-gradient(135deg,#ff6b8a,#c0392b);border:none;color:#fff;padding:0.5rem 1.2rem;border-radius:8px;cursor:pointer;font-size:0.9rem;transition:opacity 0.2s}
+.btn:hover{opacity:0.85}
+.btn-sm{padding:0.3rem 0.8rem;font-size:0.8rem;background:rgba(255,107,138,0.3);border:1px solid #ff6b8a}
+
+.dashboard{display:none;padding:1.5rem 2rem}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem}
+.stat-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,145,164,0.2);border-radius:14px;padding:1.2rem;text-align:center}
+.stat-card .val{font-size:2rem;font-weight:700;color:#ff91a4}
+.stat-card .lbl{font-size:0.78rem;color:#aaa;margin-top:0.3rem}
+.stat-card.green .val{color:#2ecc71}
+.stat-card.red .val{color:#e74c3c}
+.stat-card.yellow .val{color:#f1c40f}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem}
+@media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+.panel{background:rgba(255,255,255,0.04);border:1px solid rgba(255,145,164,0.15);border-radius:16px;padding:1.5rem}
+.panel h3{font-size:1rem;color:#ff91a4;margin-bottom:1.2rem;display:flex;align-items:center;gap:0.5rem}
+.panel canvas{max-height:300px}
+
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.85rem}
+th{background:rgba(255,145,164,0.1);color:#ff91a4;padding:0.6rem 0.8rem;text-align:left;border-bottom:1px solid rgba(255,145,164,0.2)}
+td{padding:0.6rem 0.8rem;border-bottom:1px solid rgba(255,255,255,0.05);color:#ccc}
+tr:hover td{background:rgba(255,145,164,0.05)}
+.badge{display:inline-block;padding:0.2rem 0.6rem;border-radius:12px;font-size:0.75rem;font-weight:600}
+.badge.pass{background:rgba(46,204,113,0.2);color:#2ecc71;border:1px solid #27ae60}
+.badge.fail{background:rgba(231,76,60,0.2);color:#e74c3c;border:1px solid #c0392b}
+.badge.blue{background:rgba(52,152,219,0.2);color:#3498db;border:1px solid #2980b9}
+
+.wrong-item{display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.06)}
+.wrong-item:last-child{border-bottom:none}
+.wrong-bar{height:6px;background:rgba(255,255,255,0.1);border-radius:3px;margin-top:4px;overflow:hidden}
+.wrong-fill{height:100%;background:linear-gradient(90deg,#c0392b,#e74c3c);border-radius:3px}
+
+.realtime-dot{width:8px;height:8px;border-radius:50%;background:#2ecc71;display:inline-block;animation:blink 1s infinite alternate}
+@keyframes blink{from{opacity:1}to{opacity:0.3}}
+
+.tab-bar{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{background:rgba(255,255,255,0.05);border:1px solid rgba(255,145,164,0.2);color:#aaa;padding:0.5rem 1.2rem;border-radius:20px;cursor:pointer;font-size:0.85rem;transition:all 0.2s}
+.tab.active{background:rgba(255,107,138,0.3);border-color:#ff91a4;color:#fff}
+
+.filter-bar{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center}
+.filter-bar select{background:rgba(255,255,255,0.08);border:1px solid rgba(255,145,164,0.3);color:#fff;padding:0.4rem 0.8rem;border-radius:8px;font-size:0.85rem;outline:none}
+.filter-bar label{color:#aaa;font-size:0.85rem}
+
+.no-data{text-align:center;color:#aaa;padding:3rem;font-size:0.9rem}
+.refresh-info{color:#aaa;font-size:0.78rem;margin-left:0.5rem}
+
+.progress-ring{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.speed-meter{background:rgba(255,255,255,0.04);border:1px solid rgba(255,145,164,0.15);border-radius:12px;padding:0.8rem 1rem;display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem}
+.speed-name{font-size:0.85rem;color:#ddd;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.speed-progress{flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden}
+.speed-fill{height:100%;border-radius:3px;transition:width 0.5s}
+.speed-stat{font-size:0.78rem;color:#ff91a4;min-width:50px;text-align:right}
+
+.live-badge{background:#c0392b;color:#fff;font-size:0.7rem;padding:0.15rem 0.5rem;border-radius:10px;animation:pulse-red 1s infinite alternate}
+@keyframes pulse-red{from{opacity:1}to{opacity:0.5}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🎓 Dashboard Giáo Viên - JLPT N3</h1>
+    <p>Theo dõi tiến độ lớp học theo thời gian thực</p>
+  </div>
+  <div id="loginArea">
+    <div class="login-form">
+      <input type="password" id="pwInput" placeholder="Mật khẩu giáo viên" onkeydown="if(event.key==='Enter')teacherLogin()"/>
+      <button class="btn" onclick="teacherLogin()">Đăng nhập</button>
+    </div>
+    <p style="color:#aaa;font-size:0.75rem;margin-top:0.5rem;text-align:right">Mật khẩu mặc định: teacher2024</p>
+  </div>
+  <div id="headerInfo" style="display:none;text-align:right">
+    <span class="realtime-dot"></span>
+    <span class="live-badge">LIVE</span>
+    <span class="refresh-info" id="lastRefresh">Cập nhật: --</span>
+    <br><button class="btn btn-sm" onclick="logout()" style="margin-top:0.5rem">Đăng xuất</button>
+    <button class="btn btn-sm" onclick="clearAllData()" style="background:rgba(192,57,43,0.3);border-color:#c0392b;margin-left:0.5rem">Xóa dữ liệu</button>
+  </div>
+</div>
+
+<div class="dashboard" id="dashboard">
+  <div class="tab-bar">
+    <div class="tab active" onclick="showTab('overview')">📊 Tổng quan</div>
+    <div class="tab" onclick="showTab('students')">👥 Học sinh</div>
+    <div class="tab" onclick="showTab('mistakes')">❌ Câu sai nhiều</div>
+    <div class="tab" onclick="showTab('realtime')">⚡ Tốc độ làm bài</div>
+  </div>
+
+  <!-- OVERVIEW TAB -->
+  <div id="tab-overview">
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="val" id="totalStudents">0</div><div class="lbl">Học sinh đã nộp</div></div>
+      <div class="stat-card green"><div class="val" id="passRate">0%</div><div class="lbl">Tỉ lệ đạt</div></div>
+      <div class="stat-card yellow"><div class="val" id="avgScore">0</div><div class="lbl">Điểm trung bình</div></div>
+      <div class="stat-card red"><div class="val" id="mostWrongQ">-</div><div class="lbl">Câu sai nhiều nhất</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <h3>📈 Phân bố điểm số</h3>
+        <div style="position:relative;height:260px"><canvas id="scoreChart" role="img" aria-label="Biểu đồ phân bố điểm">Phân bố điểm học sinh</canvas></div>
+      </div>
+      <div class="panel">
+        <h3>🎯 Tỉ lệ đúng/sai theo phần</h3>
+        <div style="position:relative;height:260px"><canvas id="sectionChart" role="img" aria-label="Tỉ lệ đúng theo phần">Tỉ lệ đúng sai</canvas></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>🕐 Biểu đồ nộp bài theo thời gian</h3>
+      <div style="position:relative;height:180px"><canvas id="timeChart" role="img" aria-label="Biểu đồ thời gian nộp">Thời gian nộp bài</canvas></div>
+    </div>
+  </div>
+
+  <!-- STUDENTS TAB -->
+  <div id="tab-students" style="display:none">
+    <div class="filter-bar">
+      <label>Lọc phần:</label>
+      <select id="filterSection" onchange="renderStudentTable()">
+        <option value="all">Tất cả</option>
+        <option value="vocab">文字・語彙</option>
+        <option value="grammar">文法・読解</option>
+        <option value="listening">聴解</option>
+      </select>
+      <label>Sắp xếp:</label>
+      <select id="sortBy" onchange="renderStudentTable()">
+        <option value="time">Thời gian nộp</option>
+        <option value="score">Điểm (cao→thấp)</option>
+        <option value="name">Tên</option>
+      </select>
+    </div>
+    <div class="panel">
+      <h3>👥 Danh sách học sinh</h3>
+      <div class="table-wrap">
+        <table id="studentTable">
+          <thead><tr><th>#</th><th>Học sinh</th><th>Lớp</th><th>Phần thi</th><th>Điểm</th><th>Đúng</th><th>Sai</th><th>Tỉ lệ</th><th>Kết quả</th><th>Thời gian làm</th></tr></thead>
+          <tbody id="studentTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MISTAKES TAB -->
+  <div id="tab-mistakes" style="display:none">
+    <div class="grid-2">
+      <div class="panel">
+        <h3>❌ Top 10 câu sai nhiều nhất (toàn lớp)</h3>
+        <div id="wrongList"></div>
+      </div>
+      <div class="panel">
+        <h3>📊 Biểu đồ câu sai theo phần</h3>
+        <div style="position:relative;height:280px"><canvas id="mistakeChart" role="img" aria-label="Câu sai theo phần">Câu sai</canvas></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:1.5rem">
+      <h3>📋 Chi tiết câu sai — Danh sách đầy đủ</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Câu</th><th>Phần</th><th>Dạng câu</th><th>% sai</th><th>Số HS sai</th><th>Nội dung</th></tr></thead>
+          <tbody id="mistakeDetailTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- REALTIME TAB -->
+  <div id="tab-realtime" style="display:none">
+    <div class="panel">
+      <h3>⚡ Tốc độ & Tiến độ từng học sinh</h3>
+      <p style="color:#aaa;font-size:0.82rem;margin-bottom:1rem">Cập nhật tự động mỗi 10 giây. Hiển thị % câu đã làm và điểm hiện tại.</p>
+      <div id="realtimeList"><div class="no-data">Đang chờ học sinh làm bài...</div></div>
+    </div>
+    <div class="panel" style="margin-top:1.5rem">
+      <h3>📡 Nhật ký hoạt động</h3>
+      <div id="activityLog" style="max-height:300px;overflow-y:auto;font-size:0.82rem;color:#aaa"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TEACHER_PASS='teacher2024';
+let isLoggedIn=false, refreshInterval=null;
+let scoreChartInst=null, sectionChartInst=null, timeChartInst=null, mistakeChartInst=null;
+
+const QUESTION_META={
+  v1:{section:'vocab',type:'読み方',short:'問1 西洋の読み方'},
+  v2:{section:'vocab',type:'読み方',short:'問2 苦しいの読み方'},
+  v3:{section:'vocab',type:'読み方',short:'問3 他人の読み方'},
+  v4:{section:'vocab',type:'読み方',short:'問4 腹痛の読み方'},
+  v5:{section:'vocab',type:'読み方',short:'問5 終点の読み方'},
+  v6:{section:'vocab',type:'読み方',short:'問6 泣いての読み方'},
+  v7:{section:'vocab',type:'読み方',short:'問7 帯の読み方'},
+  v8:{section:'vocab',type:'読み方',short:'問8 郵便の読み方'},
+  v9:{section:'vocab',type:'漢字',short:'問9 あたりの漢字'},
+  v10:{section:'vocab',type:'漢字',short:'問10 ずの漢字'},
+  v11:{section:'vocab',type:'漢字',short:'問11 へりの漢字'},
+  v12:{section:'vocab',type:'漢字',short:'問12 ほどうの漢字'},
+  v13:{section:'vocab',type:'漢字',short:'問13 うつの漢字'},
+  v14:{section:'vocab',type:'漢字',short:'問14 せいかくの漢字'},
+  v15:{section:'vocab',type:'語彙',short:'問15 時差'},
+  v16:{section:'vocab',type:'語彙',short:'問16 しかたない'},
+  v17:{section:'vocab',type:'語彙',short:'問17 決心'},
+  v18:{section:'vocab',type:'語彙',short:'問18 冗談'},
+  v19:{section:'vocab',type:'語彙',short:'問19 預けて'},
+  v20:{section:'vocab',type:'語彙',short:'問20 アナウンス'},
+  v21:{section:'vocab',type:'語彙',short:'問21 案外'},
+  v22:{section:'vocab',type:'語彙',short:'問22 努力'},
+  v23:{section:'vocab',type:'語彙',short:'問23 ぺこぺこ'},
+  v24:{section:'vocab',type:'語彙',short:'問24 確実な'},
+  v25:{section:'vocab',type:'語彙',short:'問25 取り付けて'},
+  v26:{section:'vocab',type:'類語',short:'問26 清潔'},
+  v27:{section:'vocab',type:'類語',short:'問27 さっき'},
+  v28:{section:'vocab',type:'類語',short:'問28 キッチン'},
+  v29:{section:'vocab',type:'類語',short:'問29 指導'},
+  v30:{section:'vocab',type:'類語',short:'問30 おやすみ'},
+  v31:{section:'vocab',type:'用法',short:'問31 にぎる'},
+  v32:{section:'vocab',type:'用法',short:'問32 修理'},
+  v33:{section:'vocab',type:'用法',short:'問33 目的'},
+  v34:{section:'vocab',type:'用法',short:'問34 懐かしい'},
+  v35:{section:'vocab',type:'用法',short:'問35 変化'},
+  g1:{section:'grammar',type:'文法',short:'問1 何度も'},
+  g2:{section:'grammar',type:'文法',short:'問2 なんか'},
+  g3:{section:'grammar',type:'文法',short:'問3 でなら'},
+  g4:{section:'grammar',type:'文法',short:'問4 あまりに'},
+  g5:{section:'grammar',type:'文法',short:'問5 にしたがって'},
+  g6:{section:'grammar',type:'文法',short:'問6 読み終わったら'},
+  g7:{section:'grammar',type:'文法',short:'問7 帰ってしまう前に'},
+  g8:{section:'grammar',type:'文法',short:'問8 建てられたのは'},
+  g9:{section:'grammar',type:'文法',short:'問9 みたいだ'},
+  g10:{section:'grammar',type:'文法',short:'問10 教えてほしい'},
+  g11:{section:'grammar',type:'文法',short:'問11 はずがない'},
+  g12:{section:'grammar',type:'文法',short:'問12 買ってきてくれる'},
+  g13:{section:'grammar',type:'文法',short:'問13 出られそうだ'},
+  g14:{section:'grammar',type:'並べ替え',short:'問14 並べ替え1'},
+  g15:{section:'grammar',type:'並べ替え',short:'問15 並べ替え2'},
+  g16:{section:'grammar',type:'並べ替え',short:'問16 並べ替え3'},
+  g17:{section:'grammar',type:'並べ替え',short:'問17 並べ替え4'},
+  g18:{section:'grammar',type:'並べ替え',short:'問18 並べ替え5'},
+  g19:{section:'grammar',type:'文章文法',short:'問19 思っていたからです'},
+  g20:{section:'grammar',type:'文章文法',short:'問20 でも'},
+  g21:{section:'grammar',type:'文章文法',short:'問21 どの'},
+  g22:{section:'grammar',type:'文章文法',short:'問22 場所なのです'},
+  g23:{section:'grammar',type:'読解',short:'問23 野菜スープ'},
+  g24:{section:'grammar',type:'読解',short:'問24 ピクニック会員'},
+  g25:{section:'grammar',type:'読解',short:'問25 旅館メール'},
+  g26:{section:'grammar',type:'読解',short:'問26 地下鉄の工夫'},
+  g27:{section:'grammar',type:'読解',short:'問27 スーパー①'},
+  g28:{section:'grammar',type:'読解',short:'問28 スーパー②'},
+  g29:{section:'grammar',type:'読解',short:'問29 スーパー③'},
+  g30:{section:'grammar',type:'読解',short:'問30 分散型ホテル①'},
+  g31:{section:'grammar',type:'読解',short:'問31 分散型ホテル②'},
+  g32:{section:'grammar',type:'読解',short:'問32 分散型ホテル③'},
+  g33:{section:'grammar',type:'読解',short:'問33 絵本①'},
+  g34:{section:'grammar',type:'読解',short:'問34 絵本②'},
+  g35:{section:'grammar',type:'読解',short:'問35 絵本③'},
+  g36:{section:'grammar',type:'読解',short:'問36 絵本④'},
+  g37:{section:'grammar',type:'読解',short:'問37 図書館①'},
+  g38:{section:'grammar',type:'読解',short:'問38 図書館②'},
+  l1:{section:'listening',type:'問題1',short:'問1-1 予約時間'},
+  l2:{section:'listening',type:'問題1',short:'問1-2 最初の仕事'},
+  l3:{section:'listening',type:'問題1',short:'問1-3 地図順序'},
+  l4:{section:'listening',type:'問題1',short:'問1-4 最初にすること'},
+  l5:{section:'listening',type:'問題1',short:'問1-5 学生の行動'},
+  l6:{section:'listening',type:'問題1',short:'問1-6 アルバイト'},
+  l7:{section:'listening',type:'問題2',short:'問2-1 赤ちゃんプレゼント'},
+  l8:{section:'listening',type:'問題2',short:'問2-2 眠れない原因'},
+  l9:{section:'listening',type:'問題2',short:'問2-3 藻の役割'},
+  l10:{section:'listening',type:'問題2',short:'問2-4 明日の天気'},
+  l11:{section:'listening',type:'問題2',short:'問2-5 バラの選び方'},
+  l12:{section:'listening',type:'問題2',short:'問2-6 ケーキが売れない理由'},
+  l13:{section:'listening',type:'問題3',short:'問3-1 総合問題'},
+  l14:{section:'listening',type:'問題4',short:'問4-1 コピー機発話'},
+  l15:{section:'listening',type:'問題4',short:'問4-2 電気店発話'},
+  l16:{section:'listening',type:'問題4',short:'問4-3 友達の家発話'},
+  l17:{section:'listening',type:'問題4',short:'問4-4 ホテル発話'},
+  l18:{section:'listening',type:'問題5',short:'問5-1 返答'},
+  l19:{section:'listening',type:'問題5',short:'問5-2 返答'},
+  l20:{section:'listening',type:'問題5',short:'問5-3 返答'}
+};
+
+function teacherLogin(){
+  const pw=document.getElementById('pwInput').value;
+  if(pw===TEACHER_PASS){
+    isLoggedIn=true;
+    document.getElementById('loginArea').style.display='none';
+    document.getElementById('headerInfo').style.display='block';
+    document.getElementById('dashboard').style.display='block';
+    startAutoRefresh();
+    refreshData();
+  } else {
+    alert('Mật khẩu không đúng!');
+  }
+}
+function logout(){location.reload();}
+function clearAllData(){
+  if(confirm('Xóa toàn bộ dữ liệu kết quả?')){
+    localStorage.removeItem('jlptResults');
+    refreshData();
+    alert('Đã xóa!');
+  }
+}
+
+function startAutoRefresh(){
+  refreshInterval=setInterval(()=>refreshData(),10000);
+}
+function refreshData(){
+  const now=new Date();
+  document.getElementById('lastRefresh').textContent='Cập nhật: '+now.getHours()+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+  const tab=document.querySelector('.tab.active');
+  const tabId=tab?tab.textContent.trim():'';
+  renderOverview();
+  const activeTab=document.querySelector('[id^=tab-]:not([style*="none"])');
+  if(activeTab){
+    if(activeTab.id==='tab-students') renderStudentTable();
+    if(activeTab.id==='tab-mistakes') renderMistakes();
+    if(activeTab.id==='tab-realtime') renderRealtime();
+  }
+}
+
+function getResults(){
+  try{return JSON.parse(localStorage.getItem('jlptResults')||'[]');}catch{return [];}
+}
+
+function showTab(t){
+  document.querySelectorAll('[id^=tab-]').forEach(el=>el.style.display='none');
+  document.getElementById('tab-'+t).style.display='block';
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  event.target.classList.add('active');
+  if(t==='students') renderStudentTable();
+  if(t==='mistakes') renderMistakes();
+  if(t==='realtime') renderRealtime();
+}
+
+function renderOverview(){
+  const results=getResults();
+  if(!results.length){
+    document.getElementById('totalStudents').textContent='0';
+    document.getElementById('passRate').textContent='0%';
+    document.getElementById('avgScore').textContent='0';
+    document.getElementById('mostWrongQ').textContent='-';
+    return;
+  }
+  const total=results.length;
+  const passed=results.filter(r=>r.passed).length;
+  const avgScore=Math.round(results.reduce((s,r)=>s+(r.score||0),0)/total);
+  const passRate=Math.round(passed/total*100);
+  document.getElementById('totalStudents').textContent=total;
+  document.getElementById('passRate').textContent=passRate+'%';
+  document.getElementById('avgScore').textContent=avgScore+'点';
+
+  const wrongCounts=getWrongCounts(results);
+  const topWrong=Object.entries(wrongCounts).sort((a,b)=>b[1]-a[1])[0];
+  if(topWrong && QUESTION_META[topWrong[0]]){
+    document.getElementById('mostWrongQ').textContent=QUESTION_META[topWrong[0]].short;
+  }
+
+  renderScoreChart(results);
+  renderSectionChart(results);
+  renderTimeChart(results);
+}
+
+function renderScoreChart(results){
+  const bins=[0,0,0,0,0,0,0,0,0,0];
+  results.forEach(r=>{
+    const pct=r.pct||0;
+    const i=Math.min(9,Math.floor(pct/10));
+    bins[i]++;
+  });
+  const labels=['0-9%','10-19%','20-29%','30-39%','40-49%','50-59%','60-69%','70-79%','80-89%','90-100%'];
+  const colors=bins.map((_,i)=>i>=6?'#2ecc71':'#e74c3c');
+  if(scoreChartInst){scoreChartInst.destroy();}
+  const ctx=document.getElementById('scoreChart').getContext('2d');
+  scoreChartInst=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Số HS',data:bins,backgroundColor:colors,borderColor:colors,borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#aaa',font:{size:10}},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#aaa',stepSize:1},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+}
+
+function renderSectionChart(results){
+  const sections={vocab:{c:0,t:0},grammar:{c:0,t:0},listening:{c:0,t:0}};
+  results.forEach(r=>{
+    const sec=r.section==='all'?null:r.section;
+    if(sec && sections[sec]){
+      sections[sec].c+=r.correct||0;
+      sections[sec].t+=(r.correct||0)+(r.wrong||0);
+    }
+  });
+  const labels=['文字・語彙','文法・読解','聴解'];
+  const pcts=Object.values(sections).map(s=>s.t?Math.round(s.c/s.t*100):0);
+  if(sectionChartInst){sectionChartInst.destroy();}
+  const ctx=document.getElementById('sectionChart').getContext('2d');
+  sectionChartInst=new Chart(ctx,{type:'doughnut',data:{labels,datasets:[{data:pcts,backgroundColor:['#3498db','#9b59b6','#2ecc71'],borderColor:'transparent',borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#aaa',font:{size:11},boxWidth:12}}}}});
+}
+
+function renderTimeChart(results){
+  const hourBins=new Array(24).fill(0);
+  results.forEach(r=>{
+    const h=new Date(r.timestamp||Date.now()).getHours();
+    hourBins[h]++;
+  });
+  const labels=Array.from({length:24},(_,i)=>i+'h');
+  if(timeChartInst){timeChartInst.destroy();}
+  const ctx=document.getElementById('timeChart').getContext('2d');
+  timeChartInst=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Nộp bài',data:hourBins,borderColor:'#ff6b8a',backgroundColor:'rgba(255,107,138,0.15)',tension:0.4,fill:true,pointRadius:3,pointBackgroundColor:'#ff6b8a'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#aaa',font:{size:10},maxRotation:0},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#aaa',stepSize:1},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+}
+
+function renderStudentTable(){
+  const results=getResults();
+  const tbody=document.getElementById('studentTbody');
+  const filterSec=document.getElementById('filterSection').value;
+  const sortBy=document.getElementById('sortBy').value;
+  let data=filterSec==='all'?results:results.filter(r=>r.section===filterSec);
+  if(sortBy==='score') data.sort((a,b)=>(b.score||0)-(a.score||0));
+  else if(sortBy==='name') data.sort((a,b)=>a.name.localeCompare(b.name));
+  else data.sort((a,b)=>new Date(b.timestamp||0)-new Date(a.timestamp||0));
+
+  if(!data.length){tbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:#aaa;padding:2rem">Chưa có dữ liệu</td></tr>';return;}
+  
+  const SECTION_NAMES={vocab:'文字・語彙',grammar:'文法・読解',listening:'聴解',all:'全部'};
+  tbody.innerHTML=data.map((r,i)=>{
+    const em=Math.floor((r.elapsed||0)/60),es=(r.elapsed||0)%60;
+    return `<tr>
+      <td>${i+1}</td>
+      <td><b style="color:#ddd">${r.name||'匿名'}</b></td>
+      <td><span class="badge blue">${r.class||'-'}</span></td>
+      <td>${SECTION_NAMES[r.section]||r.section}</td>
+      <td><b style="color:#ff91a4">${r.score||0}/${r.maxScore||60}</b></td>
+      <td style="color:#2ecc71">${r.correct||0}</td>
+      <td style="color:#e74c3c">${r.wrong||0}</td>
+      <td>${r.pct||0}%</td>
+      <td><span class="badge ${r.passed?'pass':'fail'}">${r.passed?'合格':'不合格'}</span></td>
+      <td style="color:#aaa">${em}:${String(es).padStart(2,'0')}</td>
+    </tr>`;
+  }).join('');
+}
+
+function getWrongCounts(results){
+  const counts={};
+  results.forEach(r=>{
+    if(r.answers){
+      Object.entries(r.answers).forEach(([qid,ans])=>{
+        if(!ans.correct){counts[qid]=(counts[qid]||0)+1;}
+      });
+    }
+  });
+  return counts;
+}
+
+function renderMistakes(){
+  const results=getResults();
+  if(!results.length){
+    document.getElementById('wrongList').innerHTML='<div class="no-data">Chưa có dữ liệu</div>';
+    return;
+  }
+  const counts=getWrongCounts(results);
+  const total=results.length;
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+
+  // Top 10 wrong
+  const top10=sorted.slice(0,10);
+  document.getElementById('wrongList').innerHTML=top10.map(([qid,cnt])=>{
+    const meta=QUESTION_META[qid]||{short:qid,type:'-'};
+    const pct=Math.round(cnt/total*100);
+    return `<div class="wrong-item">
+      <div style="flex:1"><div style="color:#ddd;font-size:0.85rem">${meta.short}</div>
+      <div style="color:#aaa;font-size:0.75rem">${meta.type}</div>
+      <div class="wrong-bar"><div class="wrong-fill" style="width:${pct}%"></div></div></div>
+      <div style="text-align:right;margin-left:1rem"><div style="color:#e74c3c;font-weight:700">${pct}%</div><div style="color:#aaa;font-size:0.75rem">${cnt}/${total} HS</div></div>
+    </div>`;
+  }).join('');
+
+  // Mistake chart by section
+  const sectionWrong={vocab:0,grammar:0,listening:0};
+  sorted.forEach(([qid,cnt])=>{
+    const meta=QUESTION_META[qid];
+    if(meta && sectionWrong[meta.section]!==undefined) sectionWrong[meta.section]+=cnt;
+  });
+  if(mistakeChartInst){mistakeChartInst.destroy();}
+  const ctx=document.getElementById('mistakeChart').getContext('2d');
+  mistakeChartInst=new Chart(ctx,{type:'bar',data:{labels:['文字・語彙','文法・読解','聴解'],datasets:[{label:'Số lỗi',data:Object.values(sectionWrong),backgroundColor:['#3498db','#9b59b6','#e74c3c'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,0.05)'}},y:{ticks:{color:'#aaa'},grid:{color:'rgba(255,255,255,0.05)'}}}}});
+
+  // Detail table
+  const tbody=document.getElementById('mistakeDetailTbody');
+  tbody.innerHTML=sorted.map(([qid,cnt])=>{
+    const meta=QUESTION_META[qid]||{short:qid,type:'-',section:'-'};
+    const pct=Math.round(cnt/total*100);
+    const SECTION_NAMES={vocab:'文字・語彙',grammar:'文法・読解',listening:'聴解'};
+    const barColor=pct>=70?'#e74c3c':pct>=40?'#e67e22':'#f1c40f';
+    return `<tr>
+      <td><b style="color:#ff91a4">${meta.short}</b></td>
+      <td>${SECTION_NAMES[meta.section]||meta.section}</td>
+      <td><span class="badge blue">${meta.type}</span></td>
+      <td><span style="color:${barColor};font-weight:700">${pct}%</span></td>
+      <td>${cnt}/${total}</td>
+      <td style="color:#aaa;font-size:0.82rem">Xem câu hỏi trong đề thi</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderRealtime(){
+  const results=getResults();
+  const list=document.getElementById('realtimeList');
+  const log=document.getElementById('activityLog');
+  
+  if(!results.length){list.innerHTML='<div class="no-data">Đang chờ học sinh làm bài...</div>';return;}
+  
+  const byStudent={};
+  results.forEach(r=>{
+    const key=r.name+'_'+r.class;
+    if(!byStudent[key]||new Date(r.timestamp)>new Date(byStudent[key].timestamp)){byStudent[key]=r;}
+  });
+  const students=Object.values(byStudent).sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+  
+  list.innerHTML=students.map(r=>{
+    const pct=r.pct||0;
+    const barColor=pct>=60?'#2ecc71':pct>=40?'#e67e22':'#e74c3c';
+    const qDone=Object.keys(r.answers||{}).length;
+    const total=r.section==='all'?93:r.section==='vocab'?35:r.section==='grammar'?38:20;
+    const progress=Math.round(qDone/total*100);
+    const em=Math.floor((r.elapsed||0)/60),es=(r.elapsed||0)%60;
+    return `<div class="speed-meter">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#ff6b8a,#c0392b);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">👤</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span class="speed-name" title="${r.name} (${r.class})">${r.name} <span style="color:#aaa;font-size:0.75rem">(${r.class})</span></span>
+          <span style="color:#aaa;font-size:0.75rem">${em}:${String(es).padStart(2,'0')}</span>
+        </div>
+        <div style="font-size:0.75rem;color:#aaa;margin-bottom:4px">Tiến độ: ${qDone}/${total} câu (${progress}%)</div>
+        <div class="speed-progress"><div class="speed-fill" style="width:${progress}%;background:${barColor}"></div></div>
+      </div>
+      <div class="speed-stat">${pct}%<br><span class="badge ${r.passed?'pass':'fail'}" style="font-size:0.65rem">${r.passed?'✅':'❌'}</span></div>
+    </div>`;
+  }).join('');
+
+  // Activity log
+  const recent=results.slice(-20).reverse();
+  log.innerHTML=recent.map(r=>{
+    const t=new Date(r.timestamp);
+    const tStr=t.getHours()+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
+    return `<div style="padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+      <span style="color:#ff91a4">[${tStr}]</span> <b style="color:#ddd">${r.name}</b> (${r.class}) nộp bài — 
+      <span style="color:${r.passed?'#2ecc71':'#e74c3c'}">${r.score}/${r.maxScore}点 (${r.pct}%) — ${r.passed?'合格':'不合格'}</span>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

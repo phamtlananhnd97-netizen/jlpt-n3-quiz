@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JLPT N3 練習テスト</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0a0a1a;color:#fff;min-height:100vh;overflow-x:hidden}
+.sakura-container{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999}
+.petal{position:absolute;width:12px;height:12px;background:linear-gradient(135deg,#ffb7c5,#ff69b4);border-radius:50% 0 50% 0;animation:fall linear forwards;opacity:0.85}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:0.85}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+.explosion{position:fixed;pointer-events:none;z-index:9998;animation:explode 0.8s ease-out forwards}
+@keyframes explode{0%{transform:scale(0);opacity:1}100%{transform:scale(3);opacity:0}}
+
+.login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+.login-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,182,193,0.3);border-radius:20px;padding:2.5rem;width:100%;max-width:440px;text-align:center}
+.login-card h1{font-size:2rem;color:#ff91a4;margin-bottom:0.5rem}
+.login-card p{color:#aaa;margin-bottom:2rem;font-size:0.9rem}
+.login-card input{width:100%;padding:0.9rem;border-radius:12px;border:1px solid rgba(255,182,193,0.4);background:rgba(255,255,255,0.08);color:#fff;font-size:1rem;margin-bottom:1rem;outline:none}
+.login-card input:focus{border-color:#ff91a4}
+.btn-start{background:linear-gradient(135deg,#ff6b8a,#c0392b);border:none;color:#fff;padding:1rem 2rem;border-radius:12px;font-size:1.1rem;cursor:pointer;width:100%;transition:opacity 0.2s}
+.btn-start:hover{opacity:0.85}
+
+.section-select{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+.section-cards{display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;margin-top:2rem}
+.section-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,182,193,0.3);border-radius:16px;padding:2rem;text-align:center;cursor:pointer;transition:all 0.3s;width:180px}
+.section-card:hover{background:rgba(255,145,164,0.2);border-color:#ff91a4;transform:translateY(-4px)}
+.section-card i{font-size:2.5rem;margin-bottom:1rem;display:block}
+.section-card h3{font-size:1rem;color:#fff;margin-bottom:0.3rem}
+.section-card p{font-size:0.78rem;color:#aaa}
+
+.quiz-screen{display:none;min-height:100vh;padding:1rem}
+.quiz-header{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:rgba(0,0,0,0.4);border-radius:16px;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+.quiz-header h2{color:#ff91a4;font-size:1.1rem}
+.timer{background:#c0392b;padding:0.5rem 1rem;border-radius:20px;font-weight:700;font-size:1.2rem;min-width:80px;text-align:center}
+.timer.warning{background:#e67e22;animation:pulse 0.5s infinite alternate}
+@keyframes pulse{from{opacity:1}to{opacity:0.6}}
+.score-bar{display:flex;align-items:center;gap:1rem;font-size:0.9rem;color:#ddd}
+.progress-bar{width:200px;height:8px;background:rgba(255,255,255,0.2);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#ff6b8a,#ff91a4);transition:width 0.4s}
+
+.section-header{text-align:center;margin-bottom:2rem}
+.section-header h3{font-size:1.5rem;color:#ffd700;margin-bottom:0.5rem}
+.section-header p{color:#aaa;font-size:0.9rem}
+
+.question-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,182,193,0.2);border-radius:16px;padding:2rem;max-width:800px;margin:0 auto 1.5rem}
+.question-num{font-size:0.8rem;color:#ff91a4;margin-bottom:0.5rem;font-weight:600;text-transform:uppercase}
+.question-text{font-size:1.1rem;line-height:1.7;margin-bottom:1.5rem;color:#f0f0f0}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+@media(max-width:600px){.options{grid-template-columns:1fr}}
+.option-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#ddd;padding:0.8rem 1.2rem;border-radius:10px;cursor:pointer;text-align:left;font-size:0.95rem;transition:all 0.2s;display:flex;align-items:flex-start;gap:0.5rem}
+.option-btn span.num{color:#ff91a4;font-weight:700;min-width:20px}
+.option-btn:hover:not(:disabled){background:rgba(255,145,164,0.2);border-color:#ff91a4;transform:translateX(4px)}
+.option-btn.correct{background:rgba(39,174,96,0.3);border-color:#27ae60;color:#2ecc71}
+.option-btn.wrong{background:rgba(192,57,43,0.3);border-color:#c0392b;color:#e74c3c}
+.option-btn:disabled{cursor:default}
+
+.teacher-popup{position:fixed;bottom:2rem;right:2rem;background:rgba(20,20,40,0.97);border:2px solid #ff6b8a;border-radius:20px;padding:1.5rem;max-width:340px;z-index:1000;animation:slideIn 0.4s ease;display:none}
+@keyframes slideIn{from{transform:translateX(200%);opacity:0}to{transform:translateX(0);opacity:1}}
+.teacher-popup .avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#ff6b8a,#c0392b);margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:2rem;border:3px solid #ff91a4}
+.teacher-popup h4{color:#ff91a4;text-align:center;margin-bottom:0.5rem;font-size:1rem}
+.teacher-popup p{color:#ddd;font-size:0.88rem;line-height:1.6;text-align:center}
+.teacher-popup .correct-ans{background:rgba(39,174,96,0.2);border-radius:8px;padding:0.5rem;margin-top:0.5rem;color:#2ecc71;font-size:0.88rem;text-align:center}
+.close-popup{position:absolute;top:0.5rem;right:0.75rem;background:none;border:none;color:#aaa;cursor:pointer;font-size:1.2rem}
+
+.result-screen{display:none;min-height:100vh;display:none;align-items:center;justify-content:center;padding:2rem;text-align:center}
+.result-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,182,193,0.3);border-radius:20px;padding:3rem;max-width:500px;width:100%}
+.result-card h2{font-size:2rem;color:#ffd700;margin-bottom:1rem}
+.score-display{font-size:4rem;font-weight:700;color:#ff91a4;margin:1rem 0}
+.result-detail{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:2rem 0;text-align:center}
+.result-stat{background:rgba(255,255,255,0.05);border-radius:12px;padding:1rem}
+.result-stat .val{font-size:1.8rem;font-weight:700;color:#ff91a4}
+.result-stat .lbl{font-size:0.8rem;color:#aaa;margin-top:0.25rem}
+.pass-badge{display:inline-block;padding:0.5rem 1.5rem;border-radius:20px;font-weight:700;margin-bottom:1rem}
+.pass{background:rgba(39,174,96,0.3);border:1px solid #27ae60;color:#2ecc71}
+.fail{background:rgba(192,57,43,0.3);border:1px solid #c0392b;color:#e74c3c}
+.btn-retry{background:linear-gradient(135deg,#ff6b8a,#c0392b);border:none;color:#fff;padding:0.9rem 2rem;border-radius:12px;font-size:1rem;cursor:pointer;margin-top:1rem;transition:opacity 0.2s}
+.btn-retry:hover{opacity:0.85}
+
+.nav-btns{display:flex;justify-content:center;gap:1rem;margin-top:1rem;max-width:800px;margin-left:auto;margin-right:auto}
+.nav-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,182,193,0.3);color:#ff91a4;padding:0.6rem 1.5rem;border-radius:10px;cursor:pointer;transition:all 0.2s;font-size:0.9rem}
+.nav-btn:hover{background:rgba(255,145,164,0.2)}
+.nav-btn.primary{background:linear-gradient(135deg,#ff6b8a,#c0392b);border:none;color:#fff}
+
+.stars{font-size:2rem;margin:1rem 0;letter-spacing:4px}
+</style>
+</head>
+<body>
+
+<div class="sakura-container" id="sakuraContainer"></div>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <h1>🌸 JLPT N3</h1>
+    <p>練習テスト / Bài kiểm tra luyện tập</p>
+    <input type="text" id="nameInput" placeholder="Họ và tên / お名前" />
+    <input type="text" id="classInput" placeholder="Lớp / クラス" />
+    <button class="btn-start" onclick="startLogin()">始めましょう！ 🎌</button>
+  </div>
+</div>
+
+<!-- SECTION SELECT -->
+<div class="section-select" id="sectionSelect">
+  <h2 style="color:#ff91a4;font-size:1.8rem;text-align:center">どのパートを練習しますか？</h2>
+  <p style="color:#aaa;text-align:center;margin-top:0.5rem">Chọn phần muốn luyện tập</p>
+  <div class="section-cards">
+    <div class="section-card" onclick="startSection('vocab')">
+      <i>📖</i>
+      <h3>文字・語彙</h3>
+      <p>Từ vựng & Chữ Hán</p>
+      <p style="color:#ff91a4;margin-top:0.5rem;font-size:0.82rem">35 câu • 25 phút</p>
+    </div>
+    <div class="section-card" onclick="startSection('grammar')">
+      <i>✍️</i>
+      <h3>文法・読解</h3>
+      <p>Ngữ pháp & Đọc hiểu</p>
+      <p style="color:#ff91a4;margin-top:0.5rem;font-size:0.82rem">38 câu • 70 phút</p>
+    </div>
+    <div class="section-card" onclick="startSection('listening')">
+      <i>🎧</i>
+      <h3>聴解</h3>
+      <p>Nghe hiểu</p>
+      <p style="color:#ff91a4;margin-top:0.5rem;font-size:0.82rem">38 câu • 40 phút</p>
+    </div>
+    <div class="section-card" onclick="startSection('all')">
+      <i>🏆</i>
+      <h3>全部</h3>
+      <p>Thi toàn bộ</p>
+      <p style="color:#ff91a4;margin-top:0.5rem;font-size:0.82rem">All • 135 phút</p>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-screen" id="quizScreen">
+  <div class="quiz-header">
+    <h2 id="sectionTitle">文字・語彙</h2>
+    <div class="score-bar">
+      <span id="qProgress">1/35</span>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <span>✅ <span id="correctCount">0</span></span>
+    </div>
+    <div class="timer" id="timer">25:00</div>
+  </div>
+  <div id="quizContent"></div>
+  <div class="nav-btns">
+    <button class="nav-btn" onclick="prevQuestion()" id="btnPrev">← Câu trước</button>
+    <button class="nav-btn primary" onclick="nextQuestion()" id="btnNext">Câu tiếp →</button>
+    <button class="nav-btn" onclick="submitQuiz()" style="background:rgba(192,57,43,0.4);border-color:#c0392b;color:#fff">Nộp bài 📋</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="result-screen" id="resultScreen" style="display:none">
+  <div class="result-card">
+    <div class="stars" id="resultStars">⭐⭐⭐</div>
+    <h2>結果発表！</h2>
+    <div class="score-display" id="scoreDisplay">0点</div>
+    <div class="pass-badge" id="passBadge">合格！</div>
+    <div class="result-detail">
+      <div class="result-stat"><div class="val" id="rCorrect">0</div><div class="lbl">正解数</div></div>
+      <div class="result-stat"><div class="val" id="rWrong">0</div><div class="lbl">不正解</div></div>
+      <div class="result-stat"><div class="val" id="rPercent">0%</div><div class="lbl">正答率</div></div>
+      <div class="result-stat"><div class="val" id="rTime">0:00</div><div class="lbl">時間</div></div>
+    </div>
+    <button class="btn-retry" onclick="location.reload()">もう一度挑戦 🌸</button>
+  </div>
+</div>
+
+<!-- TEACHER POPUP -->
+<div class="teacher-popup" id="teacherPopup">
+  <button class="close-popup" onclick="closePopup()">✕</button>
+  <div class="avatar">👩‍🏫</div>
+  <h4>先生のコメント</h4>
+  <p id="teacherMsg">もう一度考えてみましょう！</p>
+  <div class="correct-ans" id="correctAnsDisplay"></div>
+</div>
+
+<script>
+const TEACHER_CODE = 'teacher2024';
+let studentName='', studentClass='', currentSection='', currentQIndex=0;
+let answers={}, startTime=null, timerInterval=null, timeLeft=0;
+let questions=[], sectionConfig={};
+
+const QUESTIONS = {
+  vocab:[
+    {id:'v1',num:1,section:'文字・語彙',type:'読み方',text:'これは<u>西洋</u>の建物の写真です。',opts:['せよう','せいゆう','せいよう','せゆう'],ans:3},
+    {id:'v2',num:2,section:'文字・語彙',type:'読み方',text:'今回はとても<u>苦しい</u>試合だった。',opts:['おしい','くるしい','くやしい','きびしい'],ans:2},
+    {id:'v3',num:3,section:'文字・語彙',type:'読み方',text:'この手紙は<u>他人</u>に見せないでください。',opts:['たんじん','たじん','たんにん','たにん'],ans:4},
+    {id:'v4',num:4,section:'文字・語彙',type:'読み方',text:'昨日は<u>腹痛</u>で学校を休みました。',opts:['ふくつう','ふくつ','ずつう','ずつ'],ans:1},
+    {id:'v5',num:5,section:'文字・語彙',type:'読み方',text:'次の駅が<u>終点</u>です。',opts:['しゅうでん','しゅうてん','じゅうてん','じゅうでん'],ans:2},
+    {id:'v6',num:6,section:'文字・語彙',type:'読み方',text:'森田さんが<u>泣いて</u>いました。',opts:['はたらいて','おどろいて','ないて','やいて'],ans:3},
+    {id:'v7',num:7,section:'文字・語彙',type:'読み方',text:'この着物の<u>帯</u>は美しいです。',opts:['おび','えり','そで','いと'],ans:1},
+    {id:'v8',num:8,section:'文字・語彙',type:'読み方',text:'昨日母から<u>郵便</u>が届いた。',opts:['ようべん','ようびん','ゆうべん','ゆうびん'],ans:4},
+    {id:'v9',num:9,section:'文字・語彙',type:'漢字',text:'このあたりはマンションが多い。',opts:['通り','辺り','返り','迎り'],ans:2},
+    {id:'v10',num:10,section:'文字・語彙',type:'漢字',text:'次のずを見てください。',opts:['絵','図','表','例'],ans:2},
+    {id:'v11',num:11,section:'文字・語彙',type:'漢字',text:'貯金が少しへりました。',opts:['細りました','低りました','消りました','減りました'],ans:4},
+    {id:'v12',num:12,section:'文字・語彙',type:'漢字',text:'来年、ここにほどうができるそうだ。',opts:['歩動','走道','歩道','走動'],ans:3},
+    {id:'v13',num:13,section:'文字・語彙',type:'漢字',text:'パソコンのキーボードをうつ音が聞こえる。',opts:['打つ','押つ','指つ','折つ'],ans:1},
+    {id:'v14',num:14,section:'文字・語彙',type:'漢字',text:'山田さんは、まじめなせいかくだ。',opts:['姓格','性各','性格','姓各'],ans:3},
+    {id:'v15',num:15,section:'文字・語彙',type:'語彙',text:'私の国と日本は（　）が12時間あるので、昼と夜が反対だ。',opts:['時代','時期','時速','時差'],ans:4},
+    {id:'v16',num:16,section:'文字・語彙',type:'語彙',text:'自転車が壊れてしまい、（　）ので歩いて家に帰りました。',opts:['くわしい','だらしない','しかたない','うらやましい'],ans:3},
+    {id:'v17',num:17,section:'文字・語彙',type:'語彙',text:'病気の人を治したくて、高校生のときに医者になることを（　）した。',opts:['予想','決心','証明','仮定'],ans:2},
+    {id:'v18',num:18,section:'文字・語彙',type:'語彙',text:'彼は、いつも（　）を言って、みんなを笑わせる面白い人だ。',opts:['感想','文句','冗談','自慢'],ans:3},
+    {id:'v19',num:19,section:'文字・語彙',type:'語彙',text:'ホテルに到着したが、まだ部屋に入れなかったので、受付に荷物を（　）出かけた。',opts:['預けて','泊めて','配って','与えて'],ans:1},
+    {id:'v20',num:20,section:'文字・語彙',type:'語彙',text:'空港に着いたとき、飛行機の出発が遅れるという（　）が聞こえた。',opts:['ガイダンス','アナウンス','コマーシャル','スピーチ'],ans:2},
+    {id:'v21',num:21,section:'文字・語彙',type:'語彙',text:'休日で渋滞すると思いましたが、（　）道はすいていました。',opts:['突然','当然','年中','案外'],ans:4},
+    {id:'v22',num:22,section:'文字・語彙',type:'語彙',text:'彼は若いとき非常に苦労したが、一生懸命（　）して、立派な政治家になった。',opts:['努力','納得','期待','注意'],ans:1},
+    {id:'v23',num:23,section:'文字・語彙',type:'語彙',text:'時間がなくて、朝も昼もご飯を食べられなかったので、おなかが（　）だ。',opts:['ぺらぺら','からから','ぺこぺこ','どきどき'],ans:3},
+    {id:'v24',num:24,section:'文字・語彙',type:'語彙',text:'林さんが会社を辞めるというのは、林さんから直接聞いたので（　）情報です。',opts:['満足な','正常な','完全な','確実な'],ans:4},
+    {id:'v25',num:25,section:'文字・語彙',type:'語彙',text:'電気の工事の人が来て、部屋の壁にエアコンを（　）くれた。',opts:['取り付けて','取り上げて','受け入れて','引き受けて'],ans:1},
+    {id:'v26',num:26,section:'文字・語彙',type:'類語',text:'<u>清潔</u>なタオルで拭いてください。',opts:['柔らかい','ぬれた','乾いた','きれいな'],ans:4},
+    {id:'v27',num:27,section:'文字・語彙',type:'類語',text:'<u>さっき</u>ご飯を食べました。',opts:['急いで','少し遅れて','少し前に','ゆっくり'],ans:3},
+    {id:'v28',num:28,section:'文字・語彙',type:'類語',text:'これは<u>キッチン</u>に置いてください。',opts:['居間','台所','廊下','風呂'],ans:2},
+    {id:'v29',num:29,section:'文字・語彙',type:'類語',text:'今、野口さんが<u>指導</u>しています。',opts:['調べて','答えて','聞いて','教えて'],ans:4},
+    {id:'v30',num:30,section:'文字・語彙',type:'類語',text:'そろそろ<u>おやすみ</u>にしましょう。',opts:['休みましょう','食事にしましょう','終わりにしましょう','寝ましょう'],ans:4},
+    {id:'v31',num:31,section:'文字・語彙',type:'用法',text:'<b>にぎる</b>の正しい使い方は？',opts:['重い家具をにぎった','弟の手をしっかりとにぎった','帽子が飛ばされ走ってにぎった','赤ちゃんを大事そうににぎっている'],ans:2},
+    {id:'v32',num:32,section:'文字・語彙',type:'用法',text:'<b>修理</b>の正しい使い方は？',opts:['仲を修理したい','病院で修理してもらった','自転車を修理してもらった','漢字を修理してくれた'],ans:3},
+    {id:'v33',num:33,section:'文字・語彙',type:'用法',text:'<b>目的</b>の正しい使い方は？',opts:['目的の10万円を超えた','窓側の席がいいと目的を伝えた','出張する目的なので','この研究の目的は新しい薬の効果を調べること'],ans:4},
+    {id:'v34',num:34,section:'文字・語彙',type:'用法',text:'<b>懐かしい</b>の正しい使い方は？',opts:['子どものときの写真を見て懐かしい気持ちになった','800年前に建てられた懐かしい寺','妻とは懐かしい関係だ','会ってすぐに懐かしい友達になった'],ans:1},
+    {id:'v35',num:35,section:'文字・語彙',type:'用法',text:'<b>変化</b>の正しい使い方は？',opts:['食事の約束が来週に変化した','住所が変化した','人々の生活は大きく変化した','司会は高橋さんに変化するそうだ'],ans:3},
+  ],
+  grammar:[
+    {id:'g1',num:1,section:'文法',type:'文法',text:'友人の田中さんは京都が大好きで、今までに何度（　）行ったことがあるそうだ。',opts:['も','は','など','ぐらい'],ans:1},
+    {id:'g2',num:2,section:'文法',type:'文法',text:'「寒いから、温かいうどん（　）どう？」',opts:['に','だけ','まで','なんか'],ans:4},
+    {id:'g3',num:3,section:'文法',type:'文法',text:'手紙（　）、普段は恥ずかしくてなかなか言えない感謝の気持ちを伝えられるからだ。',opts:['でなら','にな','でしか','にしか'],ans:1},
+    {id:'g4',num:4,section:'文法',type:'文法',text:'いつもは雨でも自転車で大学に行くが、今朝は（　）雨が強かったので、バスで行った。',opts:['ちっとも','あまりに','次第に','今にも'],ans:2},
+    {id:'g5',num:5,section:'文法',type:'文法',text:'先週、登山をした。登っていく（　）風が冷たくなって、とても気持ちがよかった。',opts:['とすると','のと比べると','にしたがって','に対して'],ans:3},
+    {id:'g6',num:6,section:'文法',type:'文法',text:'「それ、まだ途中なんだ。（　）、貸してあげるね。」',opts:['読んでいたら','読み続けたら','読んでおいたら','読み終わったら'],ans:4},
+    {id:'g7',num:7,section:'文法',type:'文法',text:'友達が国に（　）、いろいろなことを一緒にしたい。',opts:['帰っていて','帰ってしまえば','帰っている間','帰ってしまう前に'],ans:4},
+    {id:'g8',num:8,section:'文法',type:'文法',text:'この寺は、県内で最も古い寺で、（　）今から1000年以上前だそうだ。',opts:['建てられてからは','建てられたのは','建てさせるまでは','建てさせたときは'],ans:2},
+    {id:'g9',num:9,section:'文法',type:'文法',text:'「人気がある（　）よ。昨日店の前を通ったけど、たくさん人が並んでたよ。」',opts:['ことだ','せいだ','みたいだ','つもりだ'],ans:3},
+    {id:'g10',num:10,section:'文法',type:'文法',text:'「この近くで、いい眼科を知っていたら（　）。朝から目がかゆくて。」',opts:['教えたいんですが','教えてもいいですか','教えてもらうんですか','教えてほしいんですが'],ans:4},
+    {id:'g11',num:11,section:'文法',type:'文法',text:'林さんが作ったグラフなのだから、（　）と思う。',opts:['わからないに違いない','わからないはずがない','わからないかもしれない','わからなくてもかまわない'],ans:2},
+    {id:'g12',num:12,section:'文法',type:'文法',text:'父は、出張に行くと、母と私に必ずお土産を（　）。',opts:['買ってきてあげる','買っていってあげる','買ってきてくれる','買っていってくれる'],ans:3},
+    {id:'g13',num:13,section:'文法',type:'文法',text:'明日は授業に（　）。',opts:['出られそうだ','出られるそうだ','出そうだ','出るそうだ'],ans:1},
+    {id:'g14',num:14,section:'文法',type:'文法（並べ替え）',text:'昨日、本屋で小説2冊＿＿★＿＿本を１冊買った。（並べ替え）',opts:['と/の/について/レポートの書き方','の/と/レポートの書き方/について','と/レポートの書き方/について/の','レポートの書き方/について/と/の'],ans:3},
+    {id:'g15',num:15,section:'文法',type:'文法（並べ替え）',text:'「あの喫茶店、＿＿★＿＿があるよ。」（並べ替え）',opts:['で/か何か/テレビ/見たこと','テレビ/で/見たこと/か何か','テレビ/か何か/で/見たこと','か何か/テレビ/で/見たこと'],ans:3},
+    {id:'g16',num:16,section:'文法',type:'文法（並べ替え）',text:'弾けば＿＿★＿＿自分でもわかり、とても楽しい。（並べ替え）',opts:['上手に/弾くほど/なっていくのが/弾けるように','弾くほど/弾けるように/上手に/なっていくのが','弾けるように/上手に/なっていくのが/弾くほど','弾けるように/弾くほど/上手に/なっていくのが'],ans:2},
+    {id:'g17',num:17,section:'文法',type:'文法（並べ替え）',text:'会社から遠い＿＿★＿＿からだ。（並べ替え）',opts:['北町を選んだ/のは/ずっと北町に住んでみたかった/のに','のは/のに/北町を選んだ/ずっと北町に住んでみたかった','のに/のは/ずっと北町に住んでみたかった/北町を選んだ','のは/北町を選んだ/のに/ずっと北町に住んでみたかった'],ans:1},
+    {id:'g18',num:18,section:'文法',type:'文法（並べ替え）',text:'かびを防ぐ＿＿★＿＿重要らしい。（並べ替え）',opts:['ことが/使った後/ぬれたままにしない/ためには','ためには/使った後/ぬれたままにしない/ことが','使った後/ためには/ことが/ぬれたままにしない','ためには/ぬれたままにしない/ことが/使った後'],ans:2},
+    {id:'g19',num:19,section:'文法',type:'文法（文章）',text:'「会社が違っても、売っている商品は同じだと［19］。」',opts:['思います','思ってしまいます','思っていたからです','思ったことです'],ans:3},
+    {id:'g20',num:20,section:'文法',type:'文法（文章）',text:'「飲み物などが売られているのは同じです。［20］、それぞれの会社のコンビニに独自の商品があるのです。」',opts:['つまり','ところで','ちなみに','でも'],ans:4},
+    {id:'g21',num:21,section:'文法',type:'文法（文章）',text:'「見ているだけでも楽しいし、［21］会社もいい商品を売ろうとがんばっているようで、応援したくなります。」',opts:['どの','その','この','あの'],ans:1},
+    {id:'g22',num:22,section:'文法',type:'文法（文章）',text:'「行くと楽しい気分になれる［22］。」',opts:['場所にしたのです','場所なのです','場所にするのでしょう','場所なのでしょうか'],ans:2},
+    {id:'g23',num:23,section:'読解',type:'読解（短文）',text:'問23: やってみようと思ったとあるが、何をしようと思ったのか。（野菜スープの文章）',opts:['だしを使わないで料理すること','野菜の皮からだしを取ること','30分ぐらい煮てから野菜の皮をむくこと','皮をむいていない野菜でスープを作ること'],ans:2},
+    {id:'g24',num:24,section:'読解',type:'読解（情報）',text:'問24: ピクニックに参加するときに会員になろうと思っている人は、どうしなければならないか。',opts:['メールで参加の連絡をして、当日、年会費と飲み物を持っていく','当日、年会費とお菓子と飲み物を持っていく','当日、年会費と参加費と飲み物を持っていく','当日、年会費と飲み物を持っていく'],ans:4},
+    {id:'g25',num:25,section:'読解',type:'読解（メール）',text:'問25: 旅館の人が、このメールで伝えたいことはどれか。',opts:['3月25日の「和室」は空いているが「和洋室」も検討してほしい','3月25日の「和室」は予約できないので「和洋室」を検討してほしい','3月25日はどの部屋も予約できないので別の日を検討してほしい','「和室」は人気があって予約が取りにくいので早めに予約してほしい'],ans:2},
+    {id:'g26',num:26,section:'読解',type:'読解（説明）',text:'問26: 東京の地下鉄はどのような工夫をしていると言っているか。',opts:['駅と駅の間に坂を作り、電車が使用するエネルギーが少なくなるようにしてある','少ないエネルギーで坂を走れる電車を使用するようにしている','坂を減らして、少ないエネルギーで電車のスピードが出せるようにしてある','走る電車の数をできるだけ少なくして、使用するエネルギーを減らしている'],ans:1},
+    {id:'g27',num:27,section:'読解',type:'読解（長文）',text:'問27: ①そう思っていましたとあるが、どう思っていたのか。',opts:['スーパーは、必要な物を買うだけの場所だ','多くの人にとって必要な物を売っている場所が、スーパーだ','多くの人が買い物できるスーパーが、近所にもっと必要だ','近所のスーパーは、週に2、3回行く場所だ'],ans:1},
+    {id:'g28',num:28,section:'読解',type:'読解（長文）',text:'問28: ②やめてしまいましたとあるが、何をやめたのか。',opts:['夫と二人で近所のスーパーに行くこと','息子にインターネットスーパーで買い物をしてもらうこと','インターネットスーパーの使い方を息子に教えてもらうこと','息子が紹介してくれたインターネットスーパーを利用すること'],ans:4},
+    {id:'g29',num:29,section:'読解',type:'読解（長文）',text:'問29: 「私」は今、どんなことを大切だと思っているか。',opts:['夫と息子と一緒に、家族みんなで近所のスーパーで買い物をすること','夫と相談しながら、インターネットスーパーで買いたい物を選ぶこと','近所のスーパーで、夫と一緒に実物を見て、品物を選んだり探したりすること','おいしそうな品物や新鮮な品物がたくさんあるスーパーを、夫と探すこと'],ans:3},
+    {id:'g30',num:30,section:'読解',type:'読解（長文）',text:'問30: 最近、日本で営業できるようになったのは、どのようなホテルか。',opts:['泊まる部屋と受付はあるが、食事会場がないホテル','泊まる部屋だけがあって、受付や食事会場がないホテル','泊まる部屋や受付、食事会場などが、同じ建物の中にあるホテル','泊まる部屋や受付、食事会場などが、それぞれ違う建物にあるホテル'],ans:4},
+    {id:'g31',num:31,section:'読解',type:'読解（長文）',text:'問31: 分散型ホテルは、どのような客に合っているか。',opts:['泊まる部屋、受付、食事会場などの間の移動を、なるべく少なくしたい客','歴史のある町に興味があるが、泊まるのは最近建てられた建物がいいと思う客','歴史のある町を歩き回ったり、ふだんの町のようすを見たりしたい客','ホテルに泊まっているほかの客たちとの交流を大切にしたい客'],ans:3},
+    {id:'g32',num:32,section:'読解',type:'読解（長文）',text:'問32: この文章全体のテーマは何か。',opts:['歴史のあるホテルとその価値','新しいタイプのホテルとその良さ','日本のホテルに泊まる客の行動の変化','新しく建てられたホテルが町の経済に与える影響'],ans:2},
+    {id:'g33',num:33,section:'読解',type:'読解（長文）',text:'問33: 「私」は、なぜ絵本の読み聞かせ活動に参加することにしたのか。',opts:['いい絵本が見つけられなくて困っている先生を助けたかったから','絵本を読むことになって困っている妻を助けたかったから','「私」が絵本を読んだら娘が喜ぶと、妻が言ったから','子供たちに絵本の良さを伝えたかったから'],ans:3},
+    {id:'g34',num:34,section:'読解',type:'読解（長文）',text:'問34: ①娘の前で練習してよかったと思ったとあるが、なぜか。',opts:['娘が絵本の内容に興味を持ってくれたから','違う絵本のほうがいいと娘が言ってくれたから','学校での読み聞かせのやり方を知ることができたから','本の横からでも字がうまく読める方法を娘が教えてくれたから'],ans:3},
+    {id:'g35',num:35,section:'読解',type:'読解（長文）',text:'問35: ②予想とあるが、どのような予想か。',opts:['先生が選んでくれた絵本なので、子供たちは興味を持つだろう','生徒の親たちが選んだ絵本なので、子供たちも好きになるだろう','今の子供たちに人気がある絵本なので、子供たちはとても喜ぶだろう','自分が昔読んでとても面白かった絵本なので、今の子供たちも興味を持つだろう'],ans:4},
+    {id:'g36',num:36,section:'読解',type:'読解（長文）',text:'問36: ③娘はきっとうれしかったのだろうとあるが、「私」はなぜそう思ったのか。',opts:['娘が「面白かった。」と言ってくれたから','娘が、ほかの子供たちの感想をうれしそうに伝えてくれたから','娘が、いすを用意して「私」を歓迎していたとわかったから','娘の言葉から、また読み聞かせに来てほしいという気持ちを感じたから'],ans:4},
+    {id:'g37',num:37,section:'読解',type:'読解（情報）',text:'問37: 森山さんは水曜日か土曜日の17時以降に、2時間利用したい。何曜日にどの席を利用すればいいか。',opts:['水曜日に、読書席Aを利用する','水曜日に、読書席Aか読書席Bを利用する','土曜日に、読書席Aを利用する','土曜日に、読書席Aか読書席Bを利用する'],ans:3},
+    {id:'g38',num:38,section:'読解',type:'読解（情報）',text:'問38: 高校生のクレアさんは平日15時ごろから1時間、自分のパソコンで勉強したい。どうすればいいか。',opts:['貸し出しカードを持って受付に行き、読書席Bか学習席の申し込みをする','貸し出しカードを持って受付に行き、学習席かインターネット席の申し込みをする','読書席Bか学習席を利用する。申し込みは必要ない','学習席かインターネット席を利用する。申し込みは必要ない'],ans:1},
+  ],
+  listening:[
+    {id:'l1',num:1,section:'聴解',type:'問題1',text:'【問題1-1番】店員と客の会話。客が予約を取り直す時間はいつですか？（音声問題 - 選択肢から推測）',opts:['今日の午前10時','今日の午後6時','あしたの午前10時','あさっての午後6時'],ans:3},
+    {id:'l2',num:2,section:'聴解',type:'問題1',text:'【問題1-2番】店員が最初にしなければならないことは何ですか？',opts:['新商品をチェックする','倉庫を整理する','棚を掃除する','はがきを出しに行く'],ans:2},
+    {id:'l3',num:3,section:'聴解',type:'問題1（地図）',text:'【問題1-3番】地図を見ながら。アからウの順序は？',opts:['ア→イ→ウ','ウ→イ→ア','イ→ウ→ア','イ→ア→ウ'],ans:1},
+    {id:'l4',num:4,section:'聴解',type:'問題1',text:'【問題1-4番】女性が最初にすることは何ですか？',opts:['ホテルにメールする','ホテルに電話する','キャンセル料をふりこむ','みんなに連絡する'],ans:2},
+    {id:'l5',num:5,section:'聴解',type:'問題1',text:'【問題1-5番】学生が最初にすることは何ですか？',opts:['資料をメールで先生に送る','資料を印刷する','本を図書館で借りる','本を待ってくる'],ans:3},
+    {id:'l6',num:6,section:'聴解',type:'問題1',text:'【問題1-6番】アルバイトの女性が最初にすることは何ですか？',opts:['制服に着替える','チラシを配る','りんごのパイを試食する','商品を箱に詰める'],ans:1},
+    {id:'l7',num:7,section:'聴解',type:'問題2',text:'【問題2-1番】赤ちゃんへのプレゼントで、女性が一番いいと思ったのは何ですか？',opts:['ふだん使えるタオル','いい子ども服','大きくなっても読める絵本','家族が喜ぶ食べ物'],ans:3},
+    {id:'l8',num:8,section:'聴解',type:'問題2',text:'【問題2-2番】女性が眠れない一番の原因は何ですか？',opts:['部屋があたたかすぎること','寝る前にパソコンを使っていること','部屋が明るいこと','まくらが高すぎること'],ans:2},
+    {id:'l9',num:9,section:'聴解',type:'問題2',text:'【問題2-3番】海の生き物の研究で、藻が役に立つのはどのようなことですか？',opts:['化粧品を作ること','魚を育てること','電気を作ること','家を温めること'],ans:3},
+    {id:'l10',num:10,section:'聴解',type:'問題2',text:'【問題2-4番】明日の天気はどうですか？',opts:['よく晴れてあたたかい','雨がふって寒い','雨がふるがあたたかい','よく晴れるが寒い'],ans:4},
+    {id:'l11',num:11,section:'聴解',type:'問題2',text:'【問題2-5番】女性はどんなバラを買いたいと思っていますか？',opts:['色やかたちが好きなばら','かおりが好きなばら','そだてる環境に合うばら','世話に時間がかからないばら'],ans:3},
+    {id:'l12',num:12,section:'聴解',type:'問題2',text:'【問題2-6番】いちごのケーキがあまり売れなかった理由は何ですか？',opts:['値段が高いから','気温が低かったから','いちごがあまり入っていないから','宣伝が足りなかったから'],ans:2},
+    {id:'l13',num:13,section:'聴解',type:'問題3',text:'【問題3-1番】二人の会話を聞いて答える問題です。（音声を聞いて総合的に判断）',opts:['電車が好きな理由','新しい電車の紹介','電車で旅行する計画','電車の思い出について'],ans:4},
+    {id:'l14',num:14,section:'聴解',type:'問題4（発話）',text:'【問題4-1番】コピー機を使っている人に話しかけるとき、何と言いますか？',opts:['コピーを使ってもいいですか','少し待っていただけますか','あとどのくらいかかりますか','すみません、次使ってもいいですか'],ans:4},
+    {id:'l15',num:15,section:'聴解',type:'問題4（発話）',text:'【問題4-2番】電気店で店員に声をかけるとき、何と言いますか？',opts:['これはどこにありますか','このカートを使ってもいいですか','これについて教えていただけますか','この商品を見せていただけますか'],ans:3},
+    {id:'l16',num:16,section:'聴解',type:'問題4（発話）',text:'【問題4-3番】友達の家を出るとき、友達の母に何と言いますか？',opts:['お邪魔しました','ありがとうございました','また来ます','失礼します'],ans:1},
+    {id:'l17',num:17,section:'聴解',type:'問題4（発話）',text:'【問題4-4番】ホテルにチェックインするとき、何と言いますか？',opts:['予約した者ですが','部屋を見せてください','チェックインしてください','泊まりたいです'],ans:1},
+    {id:'l18',num:18,section:'聴解',type:'問題5（返答）',text:'【問題5-1番】「最近、どうですか？」に対する返答は？',opts:['おかげさまで元気です','はい、そうです','少し前に来ました'],ans:1},
+    {id:'l19',num:19,section:'聴解',type:'問題5（返答）',text:'【問題5-2番】「この荷物、持ってもらえますか？」に対する返答は？',opts:['いいえ、持っていません','はい、もちろんです','荷物はあそこです'],ans:2},
+    {id:'l20',num:20,section:'聴解',type:'問題5（返答）',text:'【問題5-3番】「もう少し早く話してもらえますか？」に対する返答は？',opts:['はい、急ぎます','すみません、ゆっくり話しますね','あ、もう遅いですね'],ans:2},
+  ]
+};
+
+const SECTION_CONFIG = {
+  vocab:{title:'文字・語彙',time:25*60,questions:'vocab',pass:60,maxScore:60},
+  grammar:{title:'文法・読解',time:70*60,questions:'grammar',pass:60,maxScore:120},
+  listening:{title:'聴解',time:40*60,questions:'listening',pass:60,maxScore:60},
+  all:{title:'全部テスト',time:135*60,questions:'all',pass:60,maxScore:180}
+};
+
+function startLogin(){
+  const n=document.getElementById('nameInput').value.trim();
+  const c=document.getElementById('classInput').value.trim();
+  if(!n){alert('名前を入力してください！');return;}
+  studentName=n; studentClass=c||'未設定';
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('sectionSelect').style.display='flex';
+  saveProgress();
+}
+
+function startSection(sec){
+  currentSection=sec;
+  if(sec==='all'){
+    questions=[...QUESTIONS.vocab,...QUESTIONS.grammar,...QUESTIONS.listening];
+  } else {
+    questions=QUESTIONS[sec];
+  }
+  const cfg=SECTION_CONFIG[sec];
+  timeLeft=cfg.time;
+  document.getElementById('sectionTitle').textContent=cfg.title;
+  document.getElementById('sectionSelect').style.display='none';
+  document.getElementById('quizScreen').style.display='block';
+  currentQIndex=0; answers={};
+  startTime=Date.now();
+  startTimer();
+  renderQuestion();
+}
+
+function startTimer(){
+  timerInterval=setInterval(()=>{
+    timeLeft--;
+    const m=Math.floor(timeLeft/60),s=timeLeft%60;
+    const t=document.getElementById('timer');
+    t.textContent=m+':'+(s<10?'0':'')+s;
+    if(timeLeft<=300) t.classList.add('warning');
+    else t.classList.remove('warning');
+    if(timeLeft<=0){clearInterval(timerInterval);submitQuiz();}
+  },1000);
+}
+
+function renderQuestion(){
+  const q=questions[currentQIndex];
+  const total=questions.length;
+  document.getElementById('qProgress').textContent=(currentQIndex+1)+'/'+total;
+  const pct=((currentQIndex+1)/total*100).toFixed(0);
+  document.getElementById('progressFill').style.width=pct+'%';
+  const correct=Object.values(answers).filter(a=>a.correct).length;
+  document.getElementById('correctCount').textContent=correct;
+  document.getElementById('btnPrev').style.visibility=currentQIndex>0?'visible':'hidden';
+  document.getElementById('btnNext').textContent=currentQIndex<total-1?'Câu tiếp →':'Nộp bài 📋';
+
+  const answered=answers[q.id];
+  let optsHtml=q.opts.map((o,i)=>{
+    let cls='option-btn';
+    if(answered){
+      if(i+1===q.ans) cls+=' correct';
+      else if(i+1===answered.selected) cls+=' wrong';
+    }
+    return `<button class="${cls}" onclick="selectAnswer('${q.id}',${i+1},${q.ans})" ${answered?'disabled':''}><span class="num">${i+1}．</span>${o}</button>`;
+  }).join('');
+
+  document.getElementById('quizContent').innerHTML=`
+    <div class="question-card">
+      <div class="question-num">問${q.num}｜${q.type}</div>
+      <div class="question-text">${q.text}</div>
+      <div class="options">${optsHtml}</div>
+    </div>`;
+}
+
+function selectAnswer(qid,sel,correct){
+  if(answers[qid]) return;
+  const isCorrect=sel===correct;
+  answers[qid]={selected:sel,correct:isCorrect,ans:correct};
+  saveProgress();
+  renderQuestion();
+  if(isCorrect){
+    triggerCherryBlossom();
+    triggerExplosion();
+  } else {
+    showTeacherPopup(qid,correct);
+  }
+}
+
+function showTeacherPopup(qid,correct){
+  const q=questions.find(x=>x.id===qid);
+  const msgs=['もう一度チャレンジ！一緒に確認しましょう 🌸','惜しいですね！正しい答えを覚えましょう！','頑張って！また練習しましょう 💪','大丈夫！ミスから学びましょう 📚'];
+  document.getElementById('teacherMsg').textContent=msgs[Math.floor(Math.random()*msgs.length)];
+  document.getElementById('correctAnsDisplay').textContent='✅ 正解：'+correct+'．'+q.opts[correct-1];
+  const p=document.getElementById('teacherPopup');
+  p.style.display='block';
+  setTimeout(()=>closePopup(),5000);
+}
+function closePopup(){document.getElementById('teacherPopup').style.display='none';}
+
+function triggerCherryBlossom(){
+  const c=document.getElementById('sakuraContainer');
+  for(let i=0;i<15;i++){
+    const p=document.createElement('div');
+    p.className='petal';
+    p.style.left=Math.random()*100+'%';
+    p.style.animationDuration=(Math.random()*2+2)+'s';
+    p.style.animationDelay=Math.random()*0.5+'s';
+    p.style.width=p.style.height=(Math.random()*8+8)+'px';
+    c.appendChild(p);
+    setTimeout(()=>p.remove(),4000);
+  }
+}
+
+function triggerExplosion(){
+  const e=document.createElement('div');
+  e.className='explosion';
+  e.style.left='50%'; e.style.top='50%';
+  e.style.fontSize='4rem';
+  e.textContent='💥';
+  document.body.appendChild(e);
+  setTimeout(()=>e.remove(),800);
+}
+
+function prevQuestion(){if(currentQIndex>0){currentQIndex--;renderQuestion();}}
+function nextQuestion(){
+  if(currentQIndex<questions.length-1){currentQIndex++;renderQuestion();}
+  else submitQuiz();
+}
+
+function submitQuiz(){
+  clearInterval(timerInterval);
+  closePopup();
+  const total=questions.length;
+  const correct=Object.values(answers).filter(a=>a.correct).length;
+  const wrong=Object.keys(answers).length-correct;
+  const unanswered=total-Object.keys(answers).length;
+  const pct=Math.round(correct/total*100);
+  const elapsed=Math.floor((Date.now()-startTime)/1000);
+  const em=Math.floor(elapsed/60),es=elapsed%60;
+
+  const cfg=SECTION_CONFIG[currentSection];
+  const jlptScore=Math.round((correct/total)*cfg.maxScore);
+  const passed=jlptScore>=cfg.maxScore*0.6;
+  const stars=pct>=90?'⭐⭐⭐':pct>=70?'⭐⭐':'⭐';
+
+  document.getElementById('resultStars').textContent=stars;
+  document.getElementById('scoreDisplay').textContent=jlptScore+'点';
+  const badge=document.getElementById('passBadge');
+  badge.className='pass-badge '+(passed?'pass':'fail');
+  badge.textContent=passed?'✅ 合格！':'❌ 不合格';
+  document.getElementById('rCorrect').textContent=correct;
+  document.getElementById('rWrong').textContent=wrong+unanswered;
+  document.getElementById('rPercent').textContent=pct+'%';
+  document.getElementById('rTime').textContent=em+':'+(es<10?'0':'')+es;
+
+  const resultData={
+    name:studentName,class:studentClass,section:currentSection,
+    score:jlptScore,maxScore:cfg.maxScore,correct,wrong:wrong+unanswered,
+    pct,passed,elapsed,answers,timestamp:new Date().toISOString()
+  };
+  saveResult(resultData);
+
+  document.getElementById('quizScreen').style.display='none';
+  document.getElementById('resultScreen').style.display='flex';
+  if(passed) for(let i=0;i<3;i++) setTimeout(()=>triggerCherryBlossom(),i*600);
+}
+
+function saveProgress(){
+  const data={studentName,studentClass,currentSection,answers,startTime};
+  try{localStorage.setItem('jlptProgress',JSON.stringify(data));}catch(e){}
+}
+
+function saveResult(data){
+  try{
+    const results=JSON.parse(localStorage.getItem('jlptResults')||'[]');
+    results.push(data);
+    localStorage.setItem('jlptResults',JSON.stringify(results));
+  }catch(e){}
+}
+</script>
+</body>
+</html>
