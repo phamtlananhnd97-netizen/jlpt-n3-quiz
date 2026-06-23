@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JLPT N3 練習問題</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Sawarabi+Mincho&display=swap');
+
+  :root {
+    --sakura-pink: #f9b8cc;
+    --deep-pink: #e8648e;
+    --petal: #fde0ea;
+    --ink: #2c1a2e;
+    --muted: #7a6070;
+    --gold: #c9924b;
+    --correct: #3aaa7a;
+    --wrong: #e05a5a;
+    --bg: #fdf6f9;
+    --card: #fff8fb;
+    --border: #f0d0dc;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SAKURA CANVAS */
+  #sakura-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  .header {
+    position: relative;
+    z-index: 10;
+    background: linear-gradient(135deg, #fce4ef 0%, #fff0f5 50%, #fce4ef 100%);
+    border-bottom: 2px solid var(--border);
+    padding: 18px 24px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(232,100,142,0.1);
+  }
+  .header h1 {
+    font-family: 'Sawarabi Mincho', serif;
+    font-size: clamp(1.3rem, 4vw, 2rem);
+    color: var(--deep-pink);
+    letter-spacing: 3px;
+  }
+  .header p { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(253,246,249,0.95);
+    backdrop-filter: blur(6px);
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .progress-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--petal);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--deep-pink), var(--gold));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .progress-text { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+
+  /* TIMER */
+  .timer-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--deep-pink);
+    min-width: 80px;
+    justify-content: center;
+  }
+
+  /* MAIN */
+  .main { position: relative; z-index: 5; max-width: 820px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Sawarabi Mincho', serif;
+    font-size: 1.15rem;
+    color: var(--deep-pink);
+    border-left: 4px solid var(--deep-pink);
+    padding-left: 12px;
+    margin: 32px 0 16px;
+    letter-spacing: 1px;
+  }
+  .section-title small { font-size: 0.75rem; color: var(--muted); font-family: 'Noto Sans JP', sans-serif; letter-spacing: 0; margin-left: 8px; }
+
+  /* QUESTION CARD */
+  .q-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 22px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 8px rgba(232,100,142,0.06);
+    transition: box-shadow 0.2s;
+  }
+  .q-card:hover { box-shadow: 0 4px 16px rgba(232,100,142,0.12); }
+  .q-num {
+    display: inline-block;
+    background: var(--deep-pink);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 2px 10px;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+  .q-text {
+    font-size: 1rem;
+    line-height: 1.8;
+    margin-bottom: 14px;
+    color: var(--ink);
+  }
+  .q-text u { text-decoration: underline; text-decoration-color: var(--deep-pink); }
+
+  /* OPTIONS */
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media(max-width:500px){ .options { grid-template-columns: 1fr; } }
+
+  .opt-btn {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--ink);
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--deep-pink);
+    background: var(--petal);
+    transform: translateY(-1px);
+  }
+  .opt-btn .opt-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    background: var(--petal);
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--deep-pink);
+    flex-shrink: 0;
+  }
+  .opt-btn.selected { border-color: #9a8af0; background: #f0eeff; }
+  .opt-btn.correct  { border-color: var(--correct); background: #eafaf4; }
+  .opt-btn.wrong    { border-color: var(--wrong);   background: #fff0f0; }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct .opt-num { background: var(--correct); color: white; }
+  .opt-btn.wrong   .opt-num { background: var(--wrong);   color: white; }
+
+  /* EXPLANATION */
+  .explanation {
+    margin-top: 14px;
+    background: linear-gradient(135deg, #fffbf0, #fff8fb);
+    border: 1.5px solid #f0d8c0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--ink);
+    display: none;
+  }
+  .explanation.show { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+  .explanation .correct-ans { color: var(--correct); font-weight: 700; font-size: 0.95rem; }
+  .explanation .why { color: var(--muted); margin-top: 6px; }
+  .explanation .trans { color: #7760a0; margin-top: 6px; font-style: italic; }
+
+  /* SUBMIT / RESULT */
+  .btn-submit {
+    display: block;
+    width: 100%;
+    max-width: 340px;
+    margin: 32px auto 0;
+    padding: 14px 0;
+    background: linear-gradient(135deg, var(--deep-pink), #c9556e);
+    color: white;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(232,100,142,0.35);
+    letter-spacing: 2px;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(232,100,142,0.45); }
+  .btn-submit:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+  /* RESULT */
+  .result-box {
+    display: none;
+    text-align: center;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 24px;
+    margin-top: 32px;
+  }
+  .result-box.show { display: block; animation: fadeIn 0.5s ease; }
+  .result-score { font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 700; color: var(--deep-pink); line-height: 1; }
+  .result-total { font-size: 1rem; color: var(--muted); margin-top: 6px; }
+  .result-time { font-size: 0.95rem; color: var(--gold); margin-top: 8px; font-weight: 600; }
+  .result-msg { font-size: 1.1rem; margin-top: 16px; color: var(--ink); }
+  .btn-retry {
+    margin-top: 20px;
+    padding: 12px 36px;
+    background: white;
+    border: 2px solid var(--deep-pink);
+    color: var(--deep-pink);
+    font-weight: 700;
+    font-size: 0.95rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-retry:hover { background: var(--deep-pink); color: white; }
+
+  /* INTRO */
+  .intro-screen {
+    position: fixed; inset: 0;
+    z-index: 100;
+    background: linear-gradient(160deg, #fce4ef 0%, #fff0f8 60%, #fde8d8 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    gap: 16px;
+  }
+  .intro-screen h1 {
+    font-family: 'Sawarabi Mincho', serif;
+    font-size: clamp(1.8rem, 6vw, 3rem);
+    color: var(--deep-pink);
+    letter-spacing: 4px;
+  }
+  .intro-screen p { color: var(--muted); font-size: 0.95rem; max-width: 480px; line-height: 1.8; }
+  .intro-screen .sakura-deco { font-size: 3rem; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .btn-start {
+    margin-top: 8px;
+    padding: 16px 52px;
+    background: linear-gradient(135deg, var(--deep-pink), #c9556e);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: 'Noto Sans JP', sans-serif;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(232,100,142,0.4);
+    letter-spacing: 3px;
+    transition: transform 0.15s;
+  }
+  .btn-start:hover { transform: scale(1.04); }
+
+  .stats-row { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+  .stat-item { text-align: center; }
+  .stat-item .num { font-size: 1.6rem; font-weight: 700; color: var(--deep-pink); }
+  .stat-item .lbl { font-size: 0.75rem; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<canvas id="sakura-canvas"></canvas>
+
+<!-- INTRO SCREEN -->
+<div class="intro-screen" id="introScreen">
+  <div class="sakura-deco">🌸</div>
+  <h1>JLPT N3 練習問題</h1>
+  <p>Đề luyện thi JLPT N3 — Văn tự · Từ vựng · Ngữ pháp · Đọc hiểu<br>Sau khi chọn đáp án sẽ hiện giải thích chi tiết bằng tiếng Việt.</p>
+  <div class="stats-row">
+    <div class="stat-item"><div class="num">70</div><div class="lbl">câu hỏi</div></div>
+    <div class="stat-item"><div class="num">⏱</div><div class="lbl">đếm giờ tự do</div></div>
+    <div class="stat-item"><div class="num">N3</div><div class="lbl">cấp độ</div></div>
+  </div>
+  <button class="btn-start" onclick="startQuiz()">始める ✿</button>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap" id="progressWrap" style="display:none">
+  <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+  <span class="progress-text" id="progressText">0 / 70</span>
+  <div class="timer-badge" id="timerBadge">⏱ 00:00</div>
+</div>
+
+<!-- HEADER -->
+<div class="header" id="mainHeader" style="display:none">
+  <h1>🌸 JLPT N3 練習問題 🌸</h1>
+  <p>Chọn đáp án — đọc giải thích — học thêm !</p>
+</div>
+
+<div class="main" id="mainContent" style="display:none"></div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const questions = [
+  // ===== 文字・語彙 問題1 (1-8) =====
+  {id:1,section:"言語知識 (文字・語彙) 問題１：漢字の読み方",
+   q:"彼女は３人姉妹の<u>長女</u>だ。",
+   opts:["ちょうじょう","ちょしょう","ちょうじょ","ちょしょ"],
+   ans:2,
+   trans:"Cô ấy là con gái cả trong ba chị em gái.",
+   why:"長女（ちょうじょ）= con gái cả. 長（ちょう）+ 女（じょ）— cách đọc âm Hán.",
+   wrongs:["ちょうじょう không đúng âm của 女","ちょしょう sai cả hai âm","ちょしょ sai âm 長"]},
+  {id:2,section:"言語知識 (文字・語彙) 問題１：漢字の読み方",
+   q:"これは<u>偽物</u>のダイヤモンドだ。",
+   opts:["にせぶつ","にせもの","ぎぶつ","ぎもつ"],
+   ans:1,
+   trans:"Đây là kim cương giả.",
+   why:"偽物（にせもの）= hàng giả. 偽（にせ）đọc theo âm Nhật thuần, 物（もの）cũng vậy. Đây là từ thuần Nhật.",
+   wrongs:["にせぶつ sai — 物 đọc là もの không phải ぶつ khi ghép với にせ","ぎぶつ/ぎもつ dùng âm Hán của 偽（ぎ）nhưng cả từ lại là thuần Nhật"]},
+  {id:3,section:"言語知識 (文字・語彙) 問題１：漢字の読み方",
+   q:"旅行で一週間家を<u>留守</u>にした。",
+   opts:["りゅうしゅ","りゅうす","るしゅ","るす"],
+   ans:3,
+   trans:"Tôi đã đi du lịch và để nhà trống cả một tuần.",
+   why:"留守（るす）= vắng nhà, nhà trống. Đây là từ thuần âm Nhật. 留（る）＋守（す）.",
+   wrongs:["りゅうしゅ/りゅうす dùng âm Hán 留（りゅう）là sai","るしゅ sai âm 守"]},
+  {id:4,section:"言語知識 (文字・語彙) 問題１：漢字の読み方",
+   q:"フランス語の<u>初級</u>コースは８月に終わる。",
+   opts:["しょきゅう","じょきゅう","はつきゅう","しょうきゅう"],
+   ans:0,
+   trans:"Khóa học tiếng Pháp trình độ cơ bản sẽ kết thúc vào tháng 8.",
+   why:"初級（しょきゅう）= cấp độ cơ bản/sơ cấp. 初（しょ）＋級（きゅう）.",
+   wrongs:["じょきゅう âm じょ không đúng cho 初","はつきゅう nhầm 初 với âm はつ (dùng trong 初めて)","しょうきゅう thêm âm う dài không đúng"]},
+  {id:5,section:"言語知識 (文字・語彙) 問題１：漢字の読み方",
+   q:"今回の試合は絶対<u>勝</u>たなければならない。",
+   opts:["もたなければ","またなければ","かたなければ","たたなければ"],
+   ans:2,
+   trans:"Trận đấu lần này nhất định phải thắng.",
+   why:"勝つ（かつ）= thắng. Dạng phủ định: 勝たない (かたない). Âm く→か trước た.",
+   wrongs:["もつ = cầm/nắm，またつ/たたつ đều không có nghĩa trong văn cảnh này"]},
+  {id:6,section:"言語知識 (文字・語彙) 問題１：漢字の読み方",
+   q:"京都を<u>経て</u>大阪へ行く。",
+   opts:["たて","へて","して","けて"],
+   ans:1,
+   trans:"Đi qua Kyoto rồi đến Osaka.",
+   why:"経る（へる）= đi qua, trải qua. 経て là dạng て形. Chú ý: 経 có thể đọc けい (âm Hán) nhưng ở đây là âm Nhật thuần へる.",
+   wrongs:["たて là 建てる/立てる","して là する","けて không phải cách đọc đúng của 経て"]},
+  {id:7,section:"言語知識 (文字・語彙) 問題１：漢字の読み方",
+   q:"煙が空に<u>消える</u>。",
+   opts:["きえる","たえる","こえる","うえる"],
+   ans:0,
+   trans:"Khói tan biến vào bầu trời.",
+   why:"消える（きえる）= tan biến, tắt, mất đi.",
+   wrongs:["たえる = chịu đựng / tuyệt chủng","こえる = vượt qua","うえる = trồng cây / đói khát"]},
+  {id:8,section:"言語知識 (文字・語彙) 問題１：漢字の読み方",
+   q:"夏休みは<u>田舎</u>の実家に帰る予定だ。",
+   opts:["たしゃ","けしき","てんか","いなか"],
+   ans:3,
+   trans:"Mùa hè tôi dự định về nhà cha mẹ ở quê.",
+   why:"田舎（いなか）= nông thôn, miền quê. Đây là từ thuần Nhật đặc biệt, không đọc theo âm Hán.",
+   wrongs:["たしゃ/けしき/てんか đều không liên quan đến cách đọc của 田舎"]},
+
+  // ===== 問題2 (9-14) =====
+  {id:9,section:"言語知識 (文字・語彙) 問題２：漢字の書き方",
+   q:"日本のマンガに<u>きょうみ</u>があります。",
+   opts:["教美","教見","興味","興見"],
+   ans:2,
+   trans:"Tôi có hứng thú với manga Nhật Bản.",
+   why:"興味（きょうみ）= hứng thú, quan tâm. 興（きょう）= hứng khởi + 味（み）= vị/cảm giác. Cụm cố định: 興味がある.",
+   wrongs:["教（きょう）có nghĩa là dạy/giáo dục, không phải hứng thú","美・見 đều không cho nghĩa 'sở thích'"]},
+  {id:10,section:"言語知識 (文字・語彙) 問題２：漢字の書き方",
+   q:"あの兄弟は性格がまったく<u>ちがいます</u>。",
+   opts:["違います","遅います","達います","遺います"],
+   ans:0,
+   trans:"Hai anh em đó tính cách hoàn toàn khác nhau.",
+   why:"違う（ちがう）= khác nhau. Hán tự 違 (ちがう/い) có bộ 辶 (di chuyển) thể hiện sự sai lệch.",
+   wrongs:["遅い（おそい）= chậm","達（たつ）= đạt được","遺（い）= để lại, di sản"]},
+  {id:11,section:"言語知識 (文字・語彙) 問題２：漢字の書き方",
+   q:"つぎの信号で<u>うせつ</u>してください。",
+   opts:["左折","左曲","右折","右曲"],
+   ans:2,
+   trans:"Hãy rẽ phải ở đèn tín hiệu tiếp theo.",
+   why:"右折（うせつ）= rẽ phải. 右（う）= phải + 折（せつ）= gấp/rẽ. Ngược lại: 左折（させつ）= rẽ trái.",
+   wrongs:["左折（させつ）là rẽ trái, không phải うせつ","曲 không dùng trong từ chỉ hướng rẽ xe"]},
+  {id:12,section:"言語知識 (文字・語彙) 問題２：漢字の書き方",
+   q:"父は仕事の<u>かんけい</u>でよく出張します。",
+   opts:["関系","関係","間系","間係"],
+   ans:1,
+   trans:"Bố tôi thường xuyên đi công tác vì công việc.",
+   why:"関係（かんけい）= mối quan hệ, liên quan. 関（かん）có bộ 門，係（けい）có người 亻 bên cạnh 糸.",
+   wrongs:["関系 — 系 có thể đọc けい nhưng từ chuẩn viết là 係","間 (かん/ま) = khoảng cách, không phải 関 (liên quan)"]},
+  {id:13,section:"言語知識 (文字・語彙) 問題２：漢字の書き方",
+   q:"息子が公園でいろいろな形の<u>は</u>を集めてきました。",
+   opts:["草","葉","菜","芽"],
+   ans:1,
+   trans:"Con trai tôi đã nhặt nhiều chiếc lá có hình dạng khác nhau ở công viên về.",
+   why:"葉（は）= chiếc lá. Bộ 艹 (草かんむり) + 木 + 世. Đây là lá cây thật.",
+   wrongs:["草（くさ）= cỏ","菜（な）= rau","芽（め）= mầm cây"]},
+  {id:14,section:"言語知識 (文字・語彙) 問題２：漢字の書き方",
+   q:"<u>きもの</u>をきて記念写真を撮る。",
+   opts:["聞物","切物","来物","着物"],
+   ans:3,
+   trans:"Mặc kimono để chụp ảnh kỷ niệm.",
+   why:"着物（きもの）= kimono (trang phục truyền thống Nhật). 着（き）= mặc + 物（もの）= đồ vật.",
+   wrongs:["聞物 không tồn tại","切物 không đúng nghĩa","来物 không tồn tại trong tiếng Nhật"]},
+
+  // ===== 問題3 (15-25) =====
+  {id:15,section:"言語知識 (文字・語彙) 問題３：文脈規定",
+   q:"駅で友だちと（　）家に帰りました。",
+   opts:["あふれて","おぼれて","はずれて","わかれて"],
+   ans:3,
+   trans:"Tôi chia tay bạn bè ở ga rồi về nhà.",
+   why:"別れる（わかれる）= chia tay, tạm biệt. Dùng khi hai người đi theo hướng khác nhau.",
+   wrongs:["あふれる = tràn đầy","おぼれる = chết đuối","はずれる = trật khỏi, không trúng"]},
+  {id:16,section:"言語知識 (文字・語彙) 問題３：文脈規定",
+   q:"田中さんは、よく（　）を言う面白い人です。",
+   opts:["冗談","文句","感想","希望"],
+   ans:0,
+   trans:"Anh Tanaka là người thú vị, hay nói đùa.",
+   why:"冗談（じょうだん）= câu đùa, lời nói vui. Cụm: 冗談を言う = nói đùa.",
+   wrongs:["文句（もんく）= lời phàn nàn","感想（かんそう）= cảm nghĩ","希望（きぼう）= hy vọng"]},
+  {id:17,section:"言語知識 (文字・語彙) 問題３：文脈規定",
+   q:"この計算は（　）なので、コンピューターを使っても時間がかかる。",
+   opts:["重大","正常","複雑","意外"],
+   ans:2,
+   trans:"Phép tính này phức tạp nên dù dùng máy tính cũng mất nhiều thời gian.",
+   why:"複雑（ふくざつ）= phức tạp. Phù hợp với ngữ cảnh: tính toán phức tạp → mất thời gian.",
+   wrongs:["重大（じゅうだい）= quan trọng/nghiêm trọng","正常（せいじょう）= bình thường (mâu thuẫn nghĩa)","意外（いがい）= bất ngờ"]},
+  {id:18,section:"言語知識 (文字・語彙) 問題３：文脈規定",
+   q:"娘はそとで遊ぶより、一人で（　）をするのが好きです。",
+   opts:["プール","ゲーム","スーツ","ルール"],
+   ans:1,
+   trans:"Con gái tôi thích chơi game một mình hơn là chơi bên ngoài.",
+   why:"ゲーム（game）= trò chơi. 'Một mình' + 'trong nhà' → chơi game phù hợp nhất.",
+   wrongs:["プール = bể bơi (ngoài trời)","スーツ = bộ vest","ルール = quy tắc (không 'làm' được)"]},
+  {id:19,section:"言語知識 (文字・語彙) 問題３：文脈規定",
+   q:"わたしの車は日本（　）です。",
+   opts:["もの","じん","だい","せい"],
+   ans:3,
+   trans:"Xe của tôi là xe sản xuất tại Nhật.",
+   why:"〜製（せい）= sản xuất tại…, xuất xứ. VD: 日本製 = made in Japan.",
+   wrongs:["〜もの = đồ vật nói chung","〜じん = người (VD: 日本人)","〜だい = thế hệ/đời/phí"]},
+  {id:20,section:"言語知識 (文字・語彙) 問題３：文脈規定",
+   q:"タクシーに乗ったら電車より（　）じかんがかかってしまった。",
+   opts:["かえって","なるべく","まっすぐ","いつでも"],
+   ans:0,
+   trans:"Đi taxi thì ngược lại lại tốn nhiều thời gian hơn đi tàu điện.",
+   why:"かえって = ngược lại, trái lại. Diễn tả kết quả bất ngờ, trái với kỳ vọng.",
+   wrongs:["なるべく = càng nhiều càng tốt","まっすぐ = thẳng tiến","いつでも = bất cứ lúc nào"]},
+  {id:21,section:"言語知識 (文字・語彙) 問題３：文脈規定",
+   q:"新宿駅に着いたら、山手線に（　）ください。",
+   opts:["のりかえて","たしかめて","まちがえて","つかまえて"],
+   ans:0,
+   trans:"Khi đến ga Shinjuku, hãy chuyển sang tuyến Yamanote.",
+   why:"乗り換える（のりかえる）= đổi tàu/xe. Cụm: 〜に乗り換える = chuyển sang tuyến…",
+   wrongs:["たしかめる = xác nhận","まちがえる = nhầm lẫn","つかまえる = bắt, tóm"]},
+  {id:22,section:"言語知識 (文字・語彙) 問題３：文脈規定",
+   q:"息子は太っているせいか、どうも運動神経が（　）。",
+   opts:["ふるい","にぶい","ゆるい","ひくい"],
+   ans:1,
+   trans:"Con trai tôi có lẽ vì béo nên phản xạ vận động kém.",
+   why:"鈍い（にぶい）= chậm chạp, kém nhạy. 運動神経が鈍い = phản xạ thể thao kém.",
+   wrongs:["ふるい = cũ/già","ゆるい = lỏng lẻo/dễ dàng","ひくい = thấp (dùng cho chiều cao, âm lượng)"]},
+  {id:23,section:"言語知識 (文字・語彙) 問題３：文脈規定",
+   q:"仕事を始める前に、（　）計画を立てなければならない。",
+   opts:["ぴたりと","おおよそ","ちゃんと","すこしも"],
+   ans:2,
+   trans:"Trước khi bắt đầu công việc, cần phải lập kế hoạch đàng hoàng.",
+   why:"ちゃんと = đàng hoàng, đúng đắn, cẩn thận. Phù hợp với nghĩa 'lập kế hoạch đàng hoàng'.",
+   wrongs:["ぴたりと = vừa khít, chính xác (dùng cho kết quả)","おおよそ = khoảng, ước chừng (mâu thuẫn)","すこしも〜ない = không một chút nào (dạng phủ định)"]},
+  {id:24,section:"言語知識 (文字・語彙) 問題３：文脈規定",
+   q:"花束を持って入院中の友達の（　）に行った。",
+   opts:["おいわい","あやまり","たのみ","おみまい"],
+   ans:3,
+   trans:"Tôi mang theo bó hoa đến thăm người bạn đang nằm viện.",
+   why:"お見舞い（おみまい）= thăm người bệnh. Cụm: お見舞いに行く = đi thăm bệnh nhân.",
+   wrongs:["おいわい = chúc mừng (không phải thăm bệnh)","あやまり = xin lỗi","たのみ = nhờ vả/yêu cầu"]},
+  {id:25,section:"言語知識 (文字・語彙) 問題３：文脈規定",
+   q:"この映画は多くの人に（　）を与えた。",
+   opts:["感想","感謝","感動","関心"],
+   ans:2,
+   trans:"Bộ phim này đã mang lại sự cảm động cho nhiều người.",
+   why:"感動（かんどう）= cảm xúc mạnh, xúc động. Cụm: 感動を与える = mang lại sự xúc động.",
+   wrongs:["感想（かんそう）= cảm nghĩ (ít cảm xúc hơn)","感謝（かんしゃ）= lòng biết ơn","関心（かんしん）= sự quan tâm"]},
+
+  // ===== 問題4 (26-30) =====
+  {id:26,section:"言語知識 (文字・語彙) 問題４：言い換え類義",
+   q:"彼女は空の星を<u>じっと見る</u>のが好きだ。",
+   opts:["見上げる","見せる","見つめる","見える"],
+   ans:2,
+   trans:"Cô ấy thích chằm chằm nhìn những ngôi sao trên bầu trời.",
+   why:"じっと見る = nhìn chằm chằm không rời mắt → 見つめる（みつめる）có nghĩa giống nhất.",
+   wrongs:["見上げる = nhìn lên","見せる = cho xem","見える = nhìn thấy (vô ý)"]},
+  {id:27,section:"言語知識 (文字・語彙) 問題４：言い換え類義",
+   q:"彼は<u>一生懸命に</u>働いている。",
+   opts:["つねに","ひっしに","にわかに","まれに"],
+   ans:1,
+   trans:"Anh ấy làm việc hết sức mình.",
+   why:"一生懸命（いっしょうけんめい）= hết sức mình → ひっしに（必死に）= tử chiến, cố hết sức. Nghĩa gần nhất.",
+   wrongs:["つねに = luôn luôn (không nói về mức độ cố gắng)","にわかに = đột ngột","まれに = hiếm khi"]},
+  {id:28,section:"言語知識 (文字・語彙) 問題４：言い換え類義",
+   q:"論文の<u>タイトル</u>がやっと決まった。",
+   opts:["話題","内容","題名","計画"],
+   ans:2,
+   trans:"Tên bài luận văn cuối cùng cũng đã được quyết định.",
+   why:"タイトル（title）= tên gọi của tác phẩm → 題名（だいめい）= tên đầu đề, tương đương nghĩa nhất.",
+   wrongs:["話題 = chủ đề nói chuyện","内容 = nội dung","計画 = kế hoạch"]},
+  {id:29,section:"言語知識 (文字・語彙) 問題４：言い換え類義",
+   q:"海外旅行の経験を<u>活用する</u>。",
+   opts:["果たす","明かす","満たす","生かす"],
+   ans:3,
+   trans:"Tận dụng kinh nghiệm du lịch nước ngoài.",
+   why:"活用する（かつようする）= tận dụng → 生かす（いかす）= tận dụng, phát huy. Nghĩa gần nhất.",
+   wrongs:["果たす = hoàn thành","明かす = tiết lộ/thức đêm","満たす = đáp ứng/làm đầy"]},
+  {id:30,section:"言語知識 (文字・語彙) 問題４：言い換え類義",
+   q:"彼の話し方はいつも<u>皮肉</u>だ。",
+   opts:["意地が悪い","役に立つ","わけがわからない","とても優しい"],
+   ans:0,
+   trans:"Cách nói chuyện của anh ấy lúc nào cũng chua ngoa, mỉa mai.",
+   why:"皮肉（ひにく）= châm biếm, mỉa mai, có ý đả kích → 意地が悪い（いじがわるい）= xấu bụng, ác ý. Nghĩa gần nhất.",
+   wrongs:["役に立つ = có ích","わけがわからない = khó hiểu","とても優しい = rất tốt bụng"]},
+
+  // ===== 問題5 (31-35) =====
+  {id:31,section:"言語知識 (文字・語彙) 問題５：用法",
+   q:"【育てる】— Câu nào dùng đúng？",
+   opts:["子供が元気に育ててほしい。","何度も直して作文を育てた。","料理がやわらかくまで、よく育てた。","ベランダに育てていた花が咲いた。"],
+   ans:3,
+   trans:"Những bông hoa tôi đã trồng ở ban công đã nở.",
+   why:"育てる（そだてる）= nuôi trồng, chăm sóc cho lớn. Câu 4 dùng đúng: hoa được trồng ở ban công. Câu 1 phải dùng 育つ（そだつ）= lớn lên (tự động).",
+   wrongs:["Câu 1: 育てて→育って (lỗi chia dạng tự động/bị động)","Câu 2: 作文 không 'nuôi trồng' được","Câu 3: 料理 cũng không dùng 育てる"]},
+  {id:32,section:"言語知識 (文字・語彙) 問題５：用法",
+   q:"【看病】— Câu nào dùng đúng？",
+   opts:["母は父の看病で倒れてしまった。","体の具合がよくないので、看病に行った。","彼女は体が弱く、よく看病になる。","あの人は花の看病をする。"],
+   ans:0,
+   trans:"Mẹ đã kiệt sức vì chăm sóc bố.",
+   why:"看病（かんびょう）= chăm sóc người bệnh. Câu 1 đúng: chăm sóc bệnh nhân (bố) đến kiệt sức.",
+   wrongs:["Câu 2: đi khám bệnh → 病院に行く mới đúng","Câu 3: bị bệnh → 病気になる mới đúng","Câu 4: 花の看病 — không chăm sóc hoa bằng từ 看病"]},
+  {id:33,section:"言語知識 (文字・語彙) 問題５：用法",
+   q:"【ずっと】— Câu nào dùng đúng？",
+   opts:["果物は何でも好きだが、ずっとリンゴが好きだ。","駅は銀行のずっと先にある。","ずっと宿題が終わって遊びに行ける。","寝ている子供を起こさないように、ずっと部屋を出た。"],
+   ans:1,
+   trans:"Ga tàu ở tít phía trước ngân hàng.",
+   why:"ずっと + 先 = ở tít phía trước, xa hơn nhiều. Câu 2 đúng.",
+   wrongs:["Câu 1: muốn nói 'đặc biệt nhất' → 特に/中でも mới đúng","Câu 3: ずっと không diễn tả 'khi đã xong'","Câu 4: ra phòng nhẹ nhàng → そっと mới đúng"]},
+  {id:34,section:"言語知識 (文字・語彙) 問題５：用法",
+   q:"【活力】— Câu nào dùng đúng？",
+   opts:["この地球は地震活力が盛んだ。","彼は決勝戦で大活力した。","彼女は活力に溢れている。","母は活力に暮らしている。"],
+   ans:2,
+   trans:"Cô ấy tràn đầy sinh lực.",
+   why:"活力（かつりょく）= sinh lực, năng lượng sống. Cụm: 活力に溢れる = tràn đầy sinh lực.",
+   wrongs:["Câu 1: 地震活力 không tồn tại → 地震活動（かつどう）mới đúng","Câu 2: 大活力した không phải từ tồn tại","Câu 4: 活力に暮らす — cần 活き活き、元気に mới đúng"]},
+  {id:35,section:"言語知識 (文字・語彙) 問題５：用法",
+   q:"【セット】— Câu nào dùng đúng？",
+   opts:["寝る前に時計のタイマーをセットした。","新しい服と靴を玄関にセットした。","セットしたバイクが故障した。","この歌をセットしたのは有名な作曲家だ。"],
+   ans:0,
+   trans:"Trước khi ngủ tôi đã cài đặt timer đồng hồ.",
+   why:"セットする = cài đặt, thiết lập (timer, máy móc). Câu 1 đúng.",
+   wrongs:["Câu 2: đặt đồ vào vị trí → 置く mới đúng","Câu 3: mua xe máy → 買った mới đúng","Câu 4: sáng tác bài hát → 作曲した mới đúng"]},
+
+  // ===== 文法 問題1 (1-13) =====
+  {id:36,section:"文法 問題１：文の文法",
+   q:"「あそこで泣いてお菓子を（　）子だよ。」",
+   opts:["ほしい","ほしそうな","ほしがっている","ほしがってみる"],
+   ans:2,
+   trans:"Đó là đứa trẻ đang khóc đòi kẹo.",
+   why:"ほしがっている = đang muốn (dùng cho người thứ 3, quan sát qua hành động). ほしい là cảm xúc nội tâm, chỉ dùng cho ngôi thứ nhất.",
+   wrongs:["ほしい chỉ dùng cho ngôi 1 (私はほしい)","ほしそうな = trông có vẻ muốn (đúng nhưng ít tự nhiên hơn ほしがっている trong văn cảnh đứa trẻ đang khóc)","ほしがってみる không phải cấu trúc tồn tại"]},
+  {id:37,section:"文法 問題１：文の文法",
+   q:"年を取るに（　）忘れることが多くなるのはしかたがない。",
+   opts:["よって","したがって","かんして","たいして"],
+   ans:1,
+   trans:"Khi lớn tuổi thì hay quên hơn, điều đó là không thể tránh khỏi.",
+   why:"〜にしたがって = theo đà, theo chiều hướng. Dùng với quá trình thay đổi dần dần.",
+   wrongs:["〜によって = do, bởi vì (nguyên nhân/phương tiện)","〜にかんして = liên quan đến","〜にたいして = đối với"]},
+  {id:38,section:"文法 問題１：文の文法",
+   q:"干し柿を（　）としたが、うまくできなかった。",
+   opts:["作った","作れる","作って","作ろう"],
+   ans:3,
+   trans:"Tôi định làm hồng khô nhưng không thành công.",
+   why:"〜（よう）としたが = định làm nhưng cuối cùng không làm được. Cấu trúc: 動詞（意向形）＋としたが.",
+   wrongs:["作った = đã làm (không diễn tả ý định thất bại)","作れる = có thể làm","作って = dạng て形, không đủ ý nghĩa"]},
+  {id:39,section:"文法 問題１：文の文法",
+   q:"店員「お席にご案内（　）。」",
+   opts:["いたします","なさいます","うかがいます","いらっしゃいます"],
+   ans:0,
+   trans:"Nhân viên: 'Tôi xin dẫn quý khách đến chỗ ngồi.'",
+   why:"ご〜いたします = kính ngữ khiêm tốn (謙譲語). Nhân viên dùng để hạ thấp bản thân khi phục vụ khách.",
+   wrongs:["なさいます = kính ngữ tôn trọng, dùng cho hành động của khách","うかがいます = hỏi/thăm (khiêm tốn nhưng sai nghĩa ở đây)","いらっしゃいます = tôn trọng, dùng cho khách"]},
+  {id:40,section:"文法 問題１：文の文法",
+   q:"私は石原先生に誕生日祝いの花束を（　）。",
+   opts:["くれた","さしあげた","やった","いただいた"],
+   ans:1,
+   trans:"Tôi đã tặng thầy Ishihara một bó hoa mừng sinh nhật.",
+   why:"さしあげる = tặng (lên trên), dùng khi mình (người nói) tặng cho người bề trên như thầy giáo.",
+   wrongs:["くれた = người khác cho mình","やった = tặng cho người dưới/bằng vai","いただいた = nhận được (từ người trên)"]},
+  {id:41,section:"文法 問題１：文の文法",
+   q:"このテレビゲームは思った（　）難しくない。",
+   opts:["から","ほど","まで","しか"],
+   ans:1,
+   trans:"Trò chơi điện tử này không khó bằng tôi nghĩ.",
+   why:"〜ほど〜ない = không đến mức… Cấu trúc so sánh: không bằng điều gì đó.",
+   wrongs:["から = vì","まで = đến tận (mức độ)","しか〜ない = chỉ có… thôi"]},
+  {id:42,section:"文法 問題１：文の文法",
+   q:"単位や卒業などを認めることとひきかえに仕事を（　）ことがあった。",
+   opts:["手伝える","手伝われる","手伝わせる","手伝わされる"],
+   ans:2,
+   trans:"Đã có trường hợp bắt [sinh viên] làm việc để đổi lấy việc công nhận tín chỉ hay tốt nghiệp.",
+   why:"手伝わせる = sai khiến người khác giúp đỡ (使役形). Trường/giáo viên ép sinh viên làm việc.",
+   wrongs:["手伝える = có thể giúp","手伝われる = được giúp (thụ động)","手伝わされる = bị buộc phải giúp (bị động của sai khiến — nghĩa này cũng hợp lý nhưng chủ ngữ 'trường' làm việc sai khiến nên 使役 phù hợp hơn)"]},
+  {id:43,section:"文法 問題１：文の文法",
+   q:"毎日サラダしか食べないんじゃ、いつ貧血に（　）よ。",
+   opts:["なるのではんばいだろうか","なっても不思議じゃない","なるはずだ","なったらいい"],
+   ans:1,
+   trans:"Nếu ngày nào cũng chỉ ăn salad thì thiếu máu cũng không có gì là lạ.",
+   why:"〜ても不思議じゃない = cũng không có gì lạ nếu… Diễn tả khả năng có thể xảy ra.",
+   wrongs:["なるのではんばいだろうか không phải cụm từ tồn tại","なるはずだ = chắc chắn sẽ xảy ra (quá chắc)","なったらいい = tốt nếu xảy ra (sai nghĩa)"]},
+  {id:44,section:"文法 問題１：文の文法",
+   q:"１週間で外国語を話せるようになるなんて（　）。",
+   opts:["あり得よう","あり得ない","あり得る","あり得た"],
+   ans:1,
+   trans:"Mà có chuyện 1 tuần học được ngoại ngữ đâu chứ!",
+   why:"あり得ない = không thể có chuyện đó. Dùng để phủ định điều không thể xảy ra.",
+   wrongs:["あり得よう = có thể xảy ra (dạng ý chí, cổ)","あり得る = có thể xảy ra","あり得た = đã có thể xảy ra"]},
+  {id:45,section:"文法 問題１：文の文法",
+   q:"上司「いいんだよ。だれ（　）間違いをすることはあるんだから。」",
+   opts:["くらいでも","だけは","だったり","だって"],
+   ans:3,
+   trans:"Sếp: 'Không sao. Ai cũng có lúc mắc lỗi mà.'",
+   why:"だって = cũng (dùng nhấn mạnh mọi người đều như vậy). だれだって = bất kỳ ai cũng.",
+   wrongs:["くらいでも = đến tầm… cũng (vẫn còn)","だけは = riêng… thì (không bao gồm cả)","だったり = lúc thì…"]},
+  {id:46,section:"文法 問題１：文の文法",
+   q:"B「そうなんだ。（　）ね。」(財布が見つかった後の会話)",
+   opts:["見つかってよかった","見つかったようだ","見つかるほうがいい","見つかりそうだった"],
+   ans:0,
+   trans:"B: 'Vậy à. May quá, tìm thấy rồi nhỉ.'",
+   why:"〜てよかった = may mà, tốt quá là… Diễn tả sự nhẹ nhõm khi việc tốt đã xảy ra.",
+   wrongs:["〜ようだ = có vẻ như (diễn đạt phỏng đoán, không phù hợp khi biết rõ rồi)","〜ほうがいい = nên (lời khuyên)","〜そうだった = suýt nữa thì"]},
+  {id:47,section:"文法 問題１：文の文法",
+   q:"ちょっと高かった革靴が、朝の通勤電車で（　）ことがあります。",
+   opts:["踏んでしまった","踏んでおいた","踏まれてしまった","踏まれておいた"],
+   ans:2,
+   trans:"Chiếc giày da đắt tiền của tôi đã bị dẫm vào trong tàu điện đi làm buổi sáng.",
+   why:"踏まれてしまった = bị dẫm (thụ động + しまう diễn tả sự cố không mong muốn).",
+   wrongs:["踏んでしまった = tôi đã dẫm vào (chủ động — sai chủ thể)","踏んでおいた = dẫm trước để... (vô nghĩa)","踏まれておいた = không tồn tại"]},
+  {id:48,section:"文法 問題１：文の文法",
+   q:"この問題に（　）は、次回にあらためて検討しましょう。",
+   opts:["して","したがって","とって","ついて"],
+   ans:3,
+   trans:"Về vấn đề này, hãy để lần sau xem xét lại.",
+   why:"〜について = về việc, liên quan đến. Cấu trúc cơ bản để nêu chủ đề.",
+   wrongs:["〜にして = làm thành, biến thành","〜にしたがって = theo chiều hướng","〜にとって = đối với (ai đó)"]},
+
+  // ===== 文法 問題2 (14-18) =====
+  {id:49,section:"文法 問題２：文の組み立て（★の位置）",
+   q:"昨日 ＿＿ ＿＿ ★ ＿＿ どれですか。\n(１.借りて ２.図書館で ３.本は ４.きた)",
+   opts:["借りて","図書館で","本は","きた"],
+   ans:1,
+   trans:"[★ = 図書館で] Cuốn sách mượn từ thư viện hôm qua là cuốn nào?",
+   why:"Thứ tự đúng: 昨日 図書館で 借りて きた 本は どれですか。★ ở vị trí 2 = 図書館で.",
+   wrongs:["Trật tự: 昨日(thời gian) → 図書館で(地点) → 借りて(動作) → きた(補助動詞) → 本は(主語)"]},
+  {id:50,section:"文法 問題２：文の組み立て（★の位置）",
+   q:"生徒は ＿＿ ＿＿ ★ ＿＿ と教室を飛び出して行った。\n(１.思う ２.ベルが ３.かと ４.鳴った)",
+   opts:["思う","ベルが","かと","鳴った"],
+   ans:3,
+   trans:"[★ = 鳴った] Học sinh vừa nghĩ là chuông đã reo là đã phóng ra khỏi lớp.",
+   why:"Thứ tự: 生徒は ベルが 鳴った かと 思う と → ★ ở vị trí 3 = 鳴った. Cấu trúc: 〜かと思うと = vừa…thì ngay lập tức.",
+   wrongs:["かと思うと là cụm cố định, không thể tách ra"]},
+  {id:51,section:"文法 問題２：文の組み立て（★の位置）",
+   q:"「でも、＿＿ ＿＿ ★ ＿＿ 思っているようですよ。」\n(１.いい車が ２.しようと ３.今度に ４.なかったら)",
+   opts:["いい車が","しようと","今度に","なかったら"],
+   ans:0,
+   trans:"[★ = いい車が] 'Nhưng hình như anh ấy nghĩ nếu không có xe tốt hơn thì để lần sau.'",
+   why:"Thứ tự: いい車が なかったら 今度に しようと 思っているようですよ。★ ở vị trí 1 = いい車が.",
+   wrongs:["なかったら là điều kiện đứng sau chủ ngữ (いい車が)"]},
+  {id:52,section:"文法 問題２：文の組み立て（★の位置）",
+   q:"毎日、まじめに ＿＿ ＿＿ ★ ＿＿ 限らない。\n(１.とは ２.試合に ３.練習しても ４.勝てる)",
+   opts:["とは","試合に","練習しても","勝てる"],
+   ans:3,
+   trans:"[★ = 勝てる] Dù ngày ngày luyện tập chăm chỉ cũng không nhất thiết là thắng được trận đấu.",
+   why:"Thứ tự: 練習しても 試合に 勝てる とは 限らない。★ ở vị trí 4 = 勝てる. Cấu trúc: 〜とは限らない = không nhất thiết là.",
+   wrongs:["とは限らない là cụm cố định phủ định sự chắc chắn"]},
+  {id:53,section:"文法 問題２：文の組み立て（★の位置）",
+   q:"＿＿ ＿＿ ★ ＿＿ 雨が降り始めた。\n(１.とたんに ２.うちへ ３.急に ４.帰ってきた)",
+   opts:["とたんに","うちへ","急に","帰ってきた"],
+   ans:0,
+   trans:"[★ = とたんに] Vừa về đến nhà thì mưa đột ngột bắt đầu rơi.",
+   why:"Thứ tự: うちへ 帰ってきた とたんに 急に 雨が降り始めた。★ ở vị trí 1 = とたんに. Cấu trúc: 〜たとたんに = vừa…thì ngay lập tức.",
+   wrongs:["とたんに đứng sau động từ た形"]},
+
+  // ===== 文法 問題3 (19-22) =====
+  {id:54,section:"文法 問題３：文章の文法（敬語の説明文）",
+   q:"動作をする人を【19】、「本を読む」→「本をお読みになる」となる。",
+   opts:["うやまおうとすると","うやまったとすると","うやまわないとしたら","うやまってからとしたら"],
+   ans:0,
+   trans:"Khi muốn tỏ lòng kính trọng người thực hiện hành động thì…",
+   why:"うやまおうとすると = khi muốn kính trọng (ý chí + とすると = nếu như vậy). Đây là cấu trúc giải thích điều kiện.",
+   wrongs:["うやまったとすると = nếu đã kính trọng (giả định quá khứ)","うやまわないとしたら = nếu không kính trọng (phủ định)","うやまってからとしたら = sau khi kính trọng rồi"]},
+  {id:55,section:"文法 問題３：文章の文法（敬語の説明文）",
+   q:"「れる」か「られる」をめうえの人の動作を表すことばにつけて、【20】人をうやまう方法がある。",
+   opts:["以下の","表した","動作した","その"],
+   ans:3,
+   trans:"Có cách tỏ lòng kính trọng người đó bằng cách thêm 'れる' hay 'られる' vào.",
+   why:"その（その）= đó, ấy. Chỉ lại người đã đề cập trước đó (người bề trên).",
+   wrongs:["以下の = dưới đây (chỉ cái sắp nêu ra, không phải người đã nêu)","表した/動作した là động từ, không phải thể liên thể đúng ngữ pháp ở đây"]},
+  {id:56,section:"文法 問題３：文章の文法（敬語の説明文）",
+   q:"【21】この場合、「れる」がつく語には「られる」はつきません。",
+   opts:["実は","しかし","そのうえ","ちなみに"],
+   ans:3,
+   trans:"Nhân tiện, trong trường hợp này, từ gắn 'れる' sẽ không gắn thêm 'られる'.",
+   why:"ちなみに = nhân tiện, thêm vào đó. Đây là thông tin bổ sung quan trọng.",
+   wrongs:["実は = thật ra (thông tin ngạc nhiên)","しかし = tuy nhiên (đối lập)","そのうえ = hơn nữa (tăng thêm)"]},
+  {id:57,section:"文法 問題３：文章の文法（敬語の説明文）",
+   q:"「(ご)本を【22】」と言えばよいわけです。",
+   opts:["読ませる","読まれる","読まさせる","読まられる"],
+   ans:1,
+   trans:"Ta có thể nói là 'được đọc sách' (kính ngữ).",
+   why:"読まれる = dạng kính ngữ bằng cách thêm れる vào 読む (5段動詞: 読む→読ま+れる).",
+   wrongs:["読ませる = bắt đọc (使役形)","読まさせる không tồn tại","読まられる sai về mặt ngữ pháp"]},
+
+  // ===== 読解 問題4 (23-26) =====
+  {id:58,section:"読解 問題４(1)：体重コントロールの文章",
+   q:"この文章で一番言いたいことは何か。",
+   opts:["体重を管理するためには、特別な運動をしなければならない。","体重を減らすためには、運動より食事に気を付けなければならない。","特別な時間を作らなくても、運動する方法はたくさんある。","生活の中で運動するためには、特別に時間を取る必要がある。"],
+   ans:2,
+   trans:"Điều bài viết muốn nói nhất là: Ngay cả không cần dành thời gian riêng, vẫn có rất nhiều cách vận động.",
+   why:"Đoạn văn nhấn mạnh: dùng cầu thang thay thang máy, bước chân rộng hơn — tức là không cần thời gian riêng vẫn có thể vận động.",
+   wrongs:["Câu 1 sai — không cần vận động đặc biệt","Câu 2 sai — không so sánh ăn uống vs vận động","Câu 4 ngược nghĩa với thông điệp chính"]},
+  {id:59,section:"読解 問題４(2)：留守番電話",
+   q:"内容と合っているのはどれか。（スミスさんの留守番電話）",
+   opts:["スミスさんは原田さんに夜遅く電話する。","スミスさんは原田さんに会いに日本へ来た。","スミスさんが行くのは大阪だけではない。","スミスさんは２週間東京にいる予定だ。"],
+   ans:2,
+   trans:"Smith không chỉ đến Osaka — ông ấy sẽ đi nhiều nơi khác ở Nhật (日本各地を回る).",
+   why:"Trong tin nhắn: 'これから大阪を始め日本各地を回る予定' = sẽ đi nhiều nơi khắp Nhật, bắt đầu từ Osaka.",
+   wrongs:["Câu 1: nhờ gọi lại, không phải ông gọi đêm","Câu 2: đến vì công tác, không phải vì gặp Harada","Câu 4: 2 tuần ở Nhật nhưng không phải chỉ ở Tokyo"]},
+  {id:60,section:"読解 問題４(3)：忘年会のお知らせ",
+   q:"このお知らせでわからないことは何か。",
+   opts:["申し込み方法","集金日","「星野ホテル」の場所","「星野ホテル」の連絡先"],
+   ans:2,
+   trans:"Điều không biết được từ thông báo này là địa chỉ của khách sạn Hoshino.",
+   why:"Thông báo chỉ ghi tên 星野ホテル và số điện thoại, nhưng không ghi địa chỉ cụ thể. Các thông tin còn lại đều có.",
+   wrongs:["Câu 1: ghi rõ viết tên vào giấy thứ 2","Câu 2: ghi '当日集めます'","Câu 4: có số ĐT 03-123-4567"]},
+  {id:61,section:"読解 問題４(4)：缶詰チーズケーキ",
+   q:"「全く違った方法」とはどんな方法か。",
+   opts:["缶詰を熱する前に混ぜた材料を入れること","できたケーキを缶に入れてもう一度熱すること","材料を混ぜて熱してから缶に入れること","店で売っているケーキを缶に入れて熱を加えること"],
+   ans:0,
+   trans:"Phương pháp hoàn toàn khác là: cho nguyên liệu chưa nướng vào hộp, đậy nắp rồi đun nóng.",
+   why:"Bài viết nói: 'できたチーズケーキを缶に入れるのではなく焼く前の状態の材料を缶の中に入れ' = không cho bánh đã nướng xong vào hộp, mà cho nguyên liệu chưa nướng vào hộp.",
+   wrongs:["Câu 2 là phương pháp cũ (đã thất bại)","Câu 3 sai — không nấu trước rồi mới cho vào hộp","Câu 4 sai — không dùng bánh ở cửa hàng"]},
+
+  // ===== 読解 問題5(1) (27-29) =====
+  {id:62,section:"読解 問題５(1)：日記の文章",
+   q:"①この宿題が本当にいやだったとあるが、なぜいやだったのか。",
+   opts:["もともと学校の宿題がいやだったから","学校の宿題があまりにも多かったから","毎日日記を書くのが大変だったから","学校の宿題は面白くなかったから"],
+   ans:2,
+   trans:"Vì viết nhật ký hàng ngày là điều rất vất vả.",
+   why:"Bài viết nói: 'まだ子供だったので、何をどう書けばいいのかわからなかったし、それも毎日書くのは、子供にとっては大変なことだった' — hai lý do: không biết viết gì, và mỗi ngày đều viết thì mệt.",
+   wrongs:["Câu 1 không được đề cập","Câu 2 không đề cập số lượng bài tập","Câu 4 quá chung chung, không phải lý do cụ thể trong bài"]},
+  {id:63,section:"読解 問題５(1)：日記の文章",
+   q:"②急に日記を書きたくなったのだとあるが、その理由として考えられるのはどれか。",
+   opts:["その日あったことを並べる日記を書くのはいやだったから","日記を書くとき、どんな気持ちだったのか書きたくなかったから","その日、反省しなければならないことが多くなったから","より計画的な人生を送ることができると思ったから"],
+   ans:3,
+   trans:"Vì nghĩ rằng có thể sống có kế hoạch hơn.",
+   why:"Bài viết: 'もっと計画的な人生を送れると思うようになったのが一番のきっかけだった' = đó là lý do chính.",
+   wrongs:["Câu 1 và 2 là lý do tại sao ghét nhật ký trước đây","Câu 3 không được nêu là lý do thay đổi"]},
+  {id:64,section:"読解 問題５(1)：日記の文章",
+   q:"本文の内容とあっているのはどれか。",
+   opts:["この人は子供のころ、日記を書くのが好きだった。","この人は子供のころ、日記に感じたことを書いていた。","この人は現在、日記を書くのがいやになっている。","この人は現在、毎日欠かさないで日記を書いている。"],
+   ans:3,
+   trans:"Người này hiện tại vẫn viết nhật ký mỗi ngày không bỏ sót.",
+   why:"Bài viết: '今も毎日、日記を書いている' = hiện tại vẫn viết mỗi ngày.",
+   wrongs:["Câu 1 sai — hồi nhỏ ghét viết nhật ký","Câu 2 sai — chỉ ghi sự kiện, không ghi cảm xúc","Câu 3 sai — hiện tại thích viết"]},
+
+  // ===== 読解 問題5(2) (30-32) =====
+  {id:65,section:"読解 問題５(2)：北海道の手紙",
+   q:"おとといときのうはどこへも出かけないで、ずっとホテルにいましたとあるが、なぜか。",
+   opts:["あまりにも寒かったので","体調がよくなかったので","薬を飲まなかったので","お金がなかったので"],
+   ans:1,
+   trans:"Vì sức khỏe không tốt (bị cảm).",
+   why:"Bài viết: '私はかぜをひいてしまって、おとといときのうはどこへも出かけないで' = bị cảm nên không ra ngoài.",
+   wrongs:["Câu 1 — lạnh thật nhưng đó không phải lý do trực tiếp","Câu 3 — uống thuốc vào buổi tối, không liên quan","Câu 4 — không đề cập tiền"]},
+  {id:66,section:"読解 問題５(2)：北海道の手紙",
+   q:"この人が北海道へ来た一番の理由は何か。",
+   opts:["論文を書くための資料を探すために","アイヌ民族に会うために","北海道の知り合いに会うために","疲れたのでゆっくり休むために"],
+   ans:0,
+   trans:"Để tìm tài liệu viết luận văn.",
+   why:"Bài: 'また論文資料探しに出かけようと思っています' + 'さくら大学に行けば、アイヌ民族の歴史に関する資料がたくさんある' → mục đích là tìm tài liệu luận văn.",
+   wrongs:["Câu 2 — gặp dân tộc Ainu không phải mục đích chính","Câu 3 — người quen chỉ mua thuốc giúp","Câu 4 — nghỉ ngơi là ước muốn phụ, không phải lý do đến"]},
+  {id:67,section:"読解 問題５(2)：北海道の手紙",
+   q:"本文の内容とあっているのはどれか。",
+   opts:["この人は、もうすぐで論文作業が終わる。","田中さんに、かぜ薬を買ってきてもらった。","この人は、明日実家に帰る予定だ。","この手紙を書いたのは、12月のようだ。"],
+   ans:3,
+   trans:"Bức thư này có vẻ được viết vào tháng 12.",
+   why:"Bài đề cập: 'お正月は実家でゆっくり休みたい' → mùa Tết gần → tháng 12. Ngoài ra 'もうちょっといるつもり' → chưa xong việc.",
+   wrongs:["Câu 1 sai — 'もうちょっとかかる'","Câu 2 sai — 知り合い (người quen, không phải Tanaka) mua thuốc","Câu 3 sai — tài liệu chưa xong, chưa về"]},
+
+  // ===== 読解 問題6 (33-36) =====
+  {id:68,section:"読解 問題６：寒さに負けない体作り",
+   q:"①いろいろな工夫とあるが、たとえばどんな工夫か。",
+   opts:["よく食べること","基本的な体作りすること","厚い洋服を着ること","ダイエットすること"],
+   ans:2,
+   trans:"Ví dụ về biện pháp: mặc thêm quần áo dày.",
+   why:"Bài viết: '厚着をしてみたり、カイロを使ったりと、いろいろな工夫をする' — ①いろいろな工夫 = mặc đồ dày và dùng túi sưởi.",
+   wrongs:["Câu 2 là điều tác giả khuyến nghị, không phải 'công phu' thông thường","Câu 1 và 4 không được đề cập"]},
+  {id:69,section:"読解 問題６：寒さに負けない体作り",
+   q:"②運動とあるが、筆者が特に強調していることは何か。",
+   opts:["軽い散歩","ウォーキング","ジョギング","筋肉トレーニング"],
+   ans:3,
+   trans:"Điều tác giả đặc biệt nhấn mạnh là luyện cơ bắp.",
+   why:"Bài: '特に筋肉トレーニングを勧めたい' = đặc biệt muốn khuyến nghị luyện cơ. Tản bộ và jogging chỉ là bước đệm.",
+   wrongs:["Tản bộ, đi bộ nhanh, chạy bộ chỉ là các bước dẫn đến — không phải điều nhấn mạnh chính"]},
+  {id:70,section:"読解 問題６：寒さに負けない体作り",
+   q:"この文章で筆者が最も言いたいことは何か。",
+   opts:["シャワーだけではなくお風呂にちゃんと入ろう。","体作りを通して、寒さを乗り切ろう。","バランスの取れた食事の重要性","筋肉トレーニングをインフルエンザとの関係"],
+   ans:1,
+   trans:"Điều tác giả muốn nói nhất là: Hãy vượt qua mùa lạnh bằng cách rèn luyện cơ thể.",
+   why:"Tiêu đề và mở đầu: '寒さに負けない体作りの４つのコツ' = 4 bí quyết rèn thể lực chống rét. Toàn bài xoay quanh chủ đề này.",
+   wrongs:["Câu 1 chỉ là 1 trong 4 mẹo","Câu 3 chỉ là 1 trong 4 mẹo","Câu 4 là chi tiết phụ, không phải thông điệp chính"]}
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let currentQ = 0;
+let score = 0;
+let answered = new Array(questions.length).fill(false);
+let timerInterval = null;
+let elapsedSeconds = 0;
+let quizStarted = false;
+let quizFinished = false;
+
+// ============================================================
+// SAKURA
+// ============================================================
+const canvas = document.getElementById('sakura-canvas');
+const ctx = canvas.getContext('2d');
+let petals = [];
+
+function resizeCanvas(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function createPetal(){
+  return {
+    x: Math.random() * canvas.width,
+    y: -20,
+    size: Math.random()*8+4,
+    speed: Math.random()*1.5+0.5,
+    swing: Math.random()*2-1,
+    angle: Math.random()*Math.PI*2,
+    angleSpeed: (Math.random()-0.5)*0.05,
+    opacity: Math.random()*0.6+0.3
+  };
+}
+
+function drawPetal(p){
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  ctx.rotate(p.angle);
+  ctx.globalAlpha = p.opacity;
+  ctx.fillStyle = '#f9b8cc';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, p.size, p.size*0.6, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function animateSakura(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(Math.random()<0.08) petals.push(createPetal());
+  petals = petals.filter(p=>{
+    p.y += p.speed;
+    p.x += Math.sin(p.y*0.02)*p.swing;
+    p.angle += p.angleSpeed;
+    drawPetal(p);
+    return p.y < canvas.height+30;
+  });
+  requestAnimationFrame(animateSakura);
+}
+animateSakura();
+
+// ============================================================
+// BUILD UI
+// ============================================================
+function startQuiz(){
+  document.getElementById('introScreen').style.display='none';
+  document.getElementById('progressWrap').style.display='flex';
+  document.getElementById('mainHeader').style.display='block';
+  document.getElementById('mainContent').style.display='block';
+  quizStarted=true;
+  renderAll();
+  startStopwatch();
+}
+
+function renderAll(){
+  const container = document.getElementById('mainContent');
+  container.innerHTML='';
+  let currentSection = '';
+  questions.forEach((q,i)=>{
+    if(q.section !== currentSection){
+      currentSection = q.section;
+      const st = document.createElement('div');
+      st.className='section-title';
+      const parts = q.section.split('：');
+      st.innerHTML = parts[0]+(parts[1]?`<small>：${parts[1]}</small>`:'');
+      container.appendChild(st);
+    }
+    container.appendChild(buildCard(q,i));
+  });
+  // Submit button
+  const btn = document.createElement('button');
+  btn.className='btn-submit';
+  btn.id='btnSubmit';
+  btn.textContent='採点する ✿';
+  btn.onclick=submitAll;
+  container.appendChild(btn);
+  // Result
+  const rb = document.createElement('div');
+  rb.className='result-box';
+  rb.id='resultBox';
+  rb.innerHTML=`<div class="result-score" id="resultScore">0</div>
+<div class="result-total" id="resultTotal">/ 70問</div>
+<div class="result-time" id="resultTime">⏱ 00:00</div>
+<div class="result-msg" id="resultMsg"></div>
+<button class="btn-retry" onclick="location.reload()">もう一度 🌸</button>`;
+  container.appendChild(rb);
+}
+
+function buildCard(q, idx){
+  const card = document.createElement('div');
+  card.className='q-card';
+  card.id=`card-${idx}`;
+  card.innerHTML=`<span class="q-num">問 ${q.id}</span>
+<div class="q-text">${q.q.replace(/\n/g,'<br>')}</div>
+<div class="options" id="opts-${idx}"></div>
+<div class="explanation" id="exp-${idx}"></div>`;
+  const optsDiv = card.querySelector(`#opts-${idx}`);
+  q.opts.forEach((opt,oi)=>{
+    const btn = document.createElement('button');
+    btn.className='opt-btn';
+    btn.id=`opt-${idx}-${oi}`;
+    btn.innerHTML=`<span class="opt-num">${oi+1}</span><span>${opt}</span>`;
+    btn.onclick=()=>selectAnswer(idx, oi, q);
+    optsDiv.appendChild(btn);
+  });
+  return card;
+}
+
+// ============================================================
+// ANSWER
+// ============================================================
+function selectAnswer(qIdx, optIdx, q){
+  if(answered[qIdx]) return;
+  answered[qIdx]=true;
+  const isCorrect = optIdx === q.ans;
+  if(isCorrect) score++;
+  // Color buttons
+  for(let i=0;i<q.opts.length;i++){
+    const b = document.getElementById(`opt-${qIdx}-${i}`);
+    b.disabled=true;
+    if(i===q.ans) b.classList.add('correct');
+    else if(i===optIdx && !isCorrect) b.classList.add('wrong');
+  }
+  // Show explanation
+  showExplanation(qIdx, q, isCorrect);
+  updateProgress();
+}
+
+function showExplanation(qIdx, q, isCorrect){
+  const exp = document.getElementById(`exp-${qIdx}`);
+  let wrongHints = '';
+  if(q.wrongs){
+    wrongHints='<div class="why"><b>Lý do các đáp án sai:</b><br>'+q.wrongs.map((w,i)=>{
+      const label = ['１','２','３','４'][i==(q.ans)?-1:i];
+      return `• ${w}`;
+    }).join('<br>')+'</div>';
+  }
+  exp.innerHTML=`<div class="correct-ans">${isCorrect?'✅ Đúng rồi！':'❌ Sai！'} Đáp án đúng: ${q.ans+1}. ${q.opts[q.ans]}</div>
+<div class="trans">🌸 Dịch nghĩa: ${q.trans}</div>
+<div class="why">💡 Giải thích: ${q.why}</div>
+${wrongHints}`;
+  exp.classList.add('show');
+}
+
+// ============================================================
+// STOPWATCH
+// ============================================================
+function startStopwatch(){
+  clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{
+    if(quizFinished) return;
+    elapsedSeconds++;
+    updateTimerBadge();
+  }, 1000);
+}
+
+function formatTime(s){
+  const m = Math.floor(s/60);
+  const sec = s % 60;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function updateTimerBadge(){
+  const b = document.getElementById('timerBadge');
+  b.textContent = `⏱ ${formatTime(elapsedSeconds)}`;
+}
+
+function scrollToCard(idx){
+  const card=document.getElementById(`card-${idx}`);
+  if(card) card.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// ============================================================
+// PROGRESS
+// ============================================================
+function updateProgress(){
+  const done=answered.filter(Boolean).length;
+  const pct=done/questions.length*100;
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressText').textContent=`${done} / ${questions.length}`;
+}
+
+// ============================================================
+// SUBMIT
+// ============================================================
+function submitAll(){
+  quizFinished = true;
+  clearInterval(timerInterval);
+  // Mark unanswered questions as skipped (show correct answer without penalizing click)
+  questions.forEach((q,i)=>{
+    if(!answered[i]){
+      answered[i]=true;
+      for(let j=0;j<q.opts.length;j++){
+        const b=document.getElementById(`opt-${i}-${j}`);
+        b.disabled=true;
+        if(j===q.ans) b.classList.add('correct');
+      }
+      showExplanation(i,q,false);
+    }
+  });
+  updateProgress();
+  document.getElementById('btnSubmit').style.display='none';
+  const rb=document.getElementById('resultBox');
+  rb.classList.add('show');
+  document.getElementById('resultScore').textContent=score;
+  const pct=Math.round(score/questions.length*100);
+  let msg='';
+  if(pct>=90) msg='🌸 Xuất sắc！素晴らしい！ Bạn đã nắm vững kiến thức N3!';
+  else if(pct>=70) msg='✨ Tốt lắm！よくできました！ Cố thêm một chút nữa nhé!';
+  else if(pct>=50) msg='💪 Cần ôn tập thêm！もう少し！ Hãy xem lại phần giải thích!';
+  else msg='📚 Hãy ôn tập nhiều hơn！また頑張って！ Đừng nản lòng nhé 🌸';
+  document.getElementById('resultMsg').textContent=msg;
+  document.getElementById('resultTime').textContent=`⏱ Thời gian làm bài: ${formatTime(elapsedSeconds)}`;
+  rb.scrollIntoView({behavior:'smooth',block:'center'});
+}
+</script>
+</body>
+</html>
