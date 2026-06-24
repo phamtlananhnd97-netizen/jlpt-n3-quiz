@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JLPT N3 語彙クイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1008;
+  --cream: #fdf8f0;
+  --washi: #f5ede0;
+  --red: #c0392b;
+  --red-light: #f9eae8;
+  --gold: #b8860b;
+  --gold-light: #fef9e7;
+  --indigo: #1b2a5e;
+  --indigo-light: #eef0f8;
+  --green: #1a6b3a;
+  --green-light: #eaf3ee;
+  --muted: #6b5d4f;
+  --border: #d9cfc4;
+  --sakura: #f4a7b9;
+  --sakura-light: #fdf0f4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Sakura petals */
+.petal {
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  animation: fall linear infinite;
+  font-size: 14px;
+}
+@keyframes fall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 0.8; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* Hero */
+.hero {
+  position: relative;
+  background: var(--indigo);
+  padding: 2.5rem 1.5rem 3rem;
+  text-align: center;
+  overflow: hidden;
+  z-index: 1;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='35' fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='1'/%3E%3Ccircle cx='40' cy='40' r='25' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1'/%3E%3C/svg%3E") repeat;
+}
+.hero-kamon {
+  font-size: 2.8rem;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 0 20px rgba(244,167,185,0.4));
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.hero h1 {
+  font-family: 'Noto Serif JP', serif;
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.hero-sub {
+  color: var(--sakura);
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  letter-spacing: 0.08em;
+}
+.hero-wave {
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 30px;
+  background: var(--cream);
+  clip-path: ellipse(55% 100% at 50% 100%);
+}
+
+/* Progress */
+.progress-bar-wrap {
+  background: var(--washi);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.progress-track {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--indigo), var(--sakura));
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.progress-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  white-space: nowrap;
+  font-weight: 500;
+}
+.score-badge {
+  background: var(--indigo);
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+/* Main */
+.main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Question card */
+.q-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 12px rgba(27,42,94,0.07);
+  animation: slideIn 0.35s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.q-header {
+  background: var(--washi);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.q-num {
+  background: var(--indigo);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+}
+.q-category {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.q-body {
+  padding: 1.25rem 1.25rem 1rem;
+}
+.q-text {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: var(--ink);
+  margin-bottom: 1.2rem;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+.q-text .blank {
+  display: inline-block;
+  min-width: 80px;
+  border-bottom: 2px solid var(--indigo);
+  color: var(--indigo);
+  font-weight: 700;
+}
+
+/* Options */
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+.opt-btn {
+  padding: 0.7rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--cream);
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.9rem;
+  color: var(--ink);
+  text-align: left;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.opt-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--indigo);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.opt-btn:hover:not(:disabled) {
+  border-color: var(--indigo);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(27,42,94,0.12);
+}
+.opt-btn:hover:not(:disabled)::before { opacity: 0.04; }
+.opt-label {
+  background: var(--indigo);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.opt-text { position: relative; z-index: 1; }
+
+.opt-btn.correct {
+  background: var(--green-light);
+  border-color: var(--green);
+  animation: popIn 0.3s ease;
+}
+.opt-btn.correct .opt-label { background: var(--green); }
+@keyframes popIn {
+  0% { transform: scale(0.97); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+.opt-btn.wrong {
+  background: var(--red-light);
+  border-color: var(--red);
+  opacity: 0.75;
+}
+.opt-btn.wrong .opt-label { background: var(--red); }
+.opt-btn:disabled { cursor: default; transform: none !important; }
+
+/* Explanation */
+.explanation {
+  margin-top: 1rem;
+  display: none;
+  animation: fadeIn 0.4s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.explanation.show { display: block; }
+
+.exp-correct {
+  background: var(--green-light);
+  border: 1px solid #a8d5b8;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  gap: 0.6rem;
+}
+.exp-wrong-picked {
+  background: var(--red-light);
+  border: 1px solid #f0b8b5;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+}
+.exp-icon { font-size: 1.2rem; flex-shrink: 0; }
+.exp-title { font-weight: 700; font-size: 0.85rem; color: var(--green); margin-bottom: 0.3rem; }
+.exp-title.red { color: var(--red); }
+.exp-body { font-size: 0.85rem; line-height: 1.65; color: var(--ink); }
+
+/* Expand sections */
+.expand-tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--cream);
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: var(--muted);
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: all 0.15s;
+}
+.tab-btn.active {
+  background: var(--indigo);
+  color: #fff;
+  border-color: var(--indigo);
+}
+
+.tab-content { display: none; }
+.tab-content.show { display: block; }
+
+/* Compare box */
+.compare-box {
+  background: var(--indigo-light);
+  border: 1px solid #c5cce8;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+}
+.compare-box h4 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--indigo);
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.cmp-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 0.75rem;
+  align-items: start;
+  margin-bottom: 0.5rem;
+  font-size: 0.83rem;
+  line-height: 1.5;
+}
+.cmp-word {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 700;
+  color: var(--indigo);
+  white-space: nowrap;
+  background: white;
+  padding: 1px 8px;
+  border-radius: 6px;
+  border: 1px solid #c5cce8;
+  font-size: 0.9rem;
+}
+.cmp-def { color: var(--ink); }
+.cmp-ex {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-top: -2px;
+}
+
+/* Example box */
+.example-box {
+  background: var(--gold-light);
+  border: 1px solid #e6d090;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+}
+.example-box h4 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 0.6rem;
+}
+.example-item {
+  font-size: 0.83rem;
+  line-height: 1.7;
+  margin-bottom: 0.4rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--gold);
+}
+.example-item .jp { font-family: 'Noto Serif JP', serif; }
+.example-item .vn { color: var(--muted); font-size: 0.78rem; }
+
+/* Result screen */
+.result-screen {
+  display: none;
+  text-align: center;
+  padding: 2rem 1rem;
+  animation: fadeIn 0.5s ease;
+}
+.result-screen.show { display: block; }
+.result-torii {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: float 3s ease-in-out infinite;
+}
+.result-score {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--indigo);
+  line-height: 1;
+}
+.result-total { font-size: 1rem; color: var(--muted); margin-bottom: 1rem; }
+.result-msg {
+  font-size: 1rem;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+  line-height: 1.7;
+}
+.result-rank {
+  display: inline-block;
+  background: var(--indigo);
+  color: #fff;
+  font-size: 1.1rem;
+  font-family: 'Noto Serif JP', serif;
+  padding: 8px 24px;
+  border-radius: 30px;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.1em;
+}
+
+/* Next button */
+.next-btn {
+  width: 100%;
+  padding: 0.85rem;
+  background: var(--indigo);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  letter-spacing: 0.08em;
+  transition: all 0.2s;
+  display: none;
+}
+.next-btn:hover { background: #263d7a; transform: translateY(-1px); }
+.next-btn.show { display: block; }
+
+.restart-btn {
+  background: var(--red);
+  color: #fff;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 10px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+.restart-btn:hover { background: #a93226; }
+
+/* Stars animation */
+.firework {
+  position: fixed;
+  pointer-events: none;
+  z-index: 100;
+  font-size: 1.5rem;
+  animation: burst 0.8s ease forwards;
+}
+@keyframes burst {
+  0% { opacity: 1; transform: scale(0.5) translateY(0); }
+  100% { opacity: 0; transform: scale(1.5) translateY(-60px); }
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .options { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 1.3rem; }
+  .q-text { font-size: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Sakura petals -->
+<div id="petals"></div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-kamon">⛩️</div>
+  <h1>JLPT N3 語彙クイズ</h1>
+  <div class="hero-sub">日本語能力試験 N3 — Từ vựng nâng cao</div>
+  <div class="hero-wave"></div>
+</div>
+
+<!-- Progress -->
+<div class="progress-bar-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="progress-label" id="progressLabel">0 / 50</div>
+  <div class="score-badge" id="scoreBadge">0 ✓</div>
+</div>
+
+<!-- Main -->
+<div class="main" id="mainArea">
+
+  <!-- Question card -->
+  <div class="q-card" id="qCard">
+    <div class="q-header">
+      <span class="q-num" id="qNum">問 1</span>
+      <span class="q-category" id="qCategory"></span>
+    </div>
+    <div class="q-body">
+      <div class="q-text" id="qText"></div>
+      <div class="options" id="optionsWrap"></div>
+      <div class="explanation" id="explanation"></div>
+      <button class="next-btn" id="nextBtn">次の問題へ ➜</button>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-screen" id="resultScreen">
+    <div class="result-torii">⛩️</div>
+    <div class="result-score" id="resultScore">0</div>
+    <div class="result-total">/ 50 問正解</div>
+    <div class="result-rank" id="resultRank"></div>
+    <div class="result-msg" id="resultMsg"></div>
+    <button class="restart-btn" onclick="restart()">🔄 もう一度挑戦する</button>
+  </div>
+</div>
+
+<script>
+const quizData = [
+  {
+    q: "この（　　）は10年前では林だった。",
+    opts: ["周り","辺り","内容","範囲"],
+    ans: 1,
+    cat: "空間・場所",
+    expCorrect: "辺り（あたり）= khu vực xung quanh, vùng lân cận (không gian rộng, không xác định cụ thể). Dùng khi nói về một khu vực chung chung.",
+    expWrong: "「周り」cũng có nghĩa xung quanh nhưng mang tính cụ thể hơn (vòng tròn bao quanh). 「内容」= nội dung, 「範囲」= phạm vi — đều không phù hợp ngữ cảnh địa điểm.",
+    compare: [
+      { w:"辺り", def:"Khu vực xung quanh (mơ hồ, rộng)", ex:"この辺りは静かだ。（Khu vực này yên tĩnh.）" },
+      { w:"周り", def:"Xung quanh (cụ thể, theo đường vòng)", ex:"池の周りを走る。（Chạy vòng quanh ao.）" },
+      { w:"近所", def:"Khu lân cận, hàng xóm", ex:"近所に公園がある。（Gần nhà có công viên.）" }
+    ],
+    examples: ["この辺りは昔、海だった。（Khu vực này ngày xưa là biển.）","駅の辺りで待っています。（Tôi đang đợi ở khu vực gần ga.）"]
+  },
+  {
+    q: "7月の終わり（　　）に旅行したい。",
+    opts: ["辺り","周り","中身","列"],
+    ans: 0,
+    cat: "時間・期間",
+    expCorrect: "辺り（あたり）dùng cho cả thời gian, nghĩa là 'khoảng, vào khoảng'. 「7月の終わり辺りに」= vào khoảng cuối tháng 7.",
+    expWrong: "「周り」không dùng cho thời gian. 「中身」= nội dung bên trong, 「列」= hàng dãy — không liên quan.",
+    compare: [
+      { w:"辺り（時間）", def:"Khoảng thời gian (ước chừng)", ex:"3時辺りに来てください。（Hãy đến khoảng 3 giờ.）" },
+      { w:"頃（ごろ）", def:"Khoảng, vào lúc (lịch sự, thông dụng hơn)", ex:"3時頃に来てください。（Hãy đến khoảng 3 giờ.）" },
+      { w:"前後（ぜんご）", def:"Trước sau, xung quanh thời điểm đó", ex:"10時前後に到着する。（Đến nơi vào khoảng 10 giờ.）" }
+    ],
+    examples: ["年末辺りに帰国する予定だ。（Dự định về nước vào khoảng cuối năm.）","来週辺りに連絡します。（Tôi sẽ liên lạc vào khoảng tuần tới.）"]
+  },
+  {
+    q: "今日はこの（　　）で終わりにしよう。",
+    opts: ["範囲","辺り","景色","特徴"],
+    ans: 1,
+    cat: "場所・程度",
+    expCorrect: "「このあたりで終わりにする」là cách nói cố định rất thông dụng trong tiếng Nhật, nghĩa là 'thôi kết thúc ở đây/mức này'. 辺り ở đây dùng nghĩa bóng, không phải không gian.",
+    expWrong: "「この範囲で終わり」không tự nhiên bằng. Câu này kiểm tra cách dùng bóng của 辺り — học sinh dễ nhầm với 範囲.",
+    compare: [
+      { w:"このあたりで", def:"Thôi đến đây (kết thúc tự nhiên)", ex:"今日はこのあたりで終わりにします。" },
+      { w:"ここで", def:"Ở đây, tại điểm này (trực tiếp hơn)", ex:"ここで話を終わります。" },
+      { w:"この辺で", def:"Bằng đây (cũng dùng được)", ex:"この辺で勘弁してください。（Xin tha cho đến đây thôi.）" }
+    ],
+    examples: ["今日の授業はこの辺で終わりにします。（Buổi học hôm nay kết thúc ở đây.）","会議はこのあたりで終わりにしましょう。（Hãy kết thúc cuộc họp ở đây.）"]
+  },
+  {
+    q: "池の（　　）を散歩する。",
+    opts: ["辺り","周り","内容","列"],
+    ans: 1,
+    cat: "空間・方向",
+    expCorrect: "「周り」= xung quanh theo đường vòng cụ thể. 「池の周り」= đi vòng quanh ao — hình ảnh cụ thể, rõ ràng.",
+    expWrong: "「辺り」cũng có thể dùng nhưng 「周り」cụ thể hơn khi nói về việc đi vòng quanh một vật. 「内容」「列」không liên quan.",
+    compare: [
+      { w:"周り", def:"Xung quanh (cụ thể, có hình dạng vòng)", ex:"公園の周りを歩く。（Đi xung quanh công viên.）" },
+      { w:"辺り", def:"Vùng lân cận (mơ hồ hơn)", ex:"池の辺りで写真を撮る。（Chụp ảnh ở khu vực quanh ao.）" },
+      { w:"そば・近く", def:"Gần, bên cạnh", ex:"駅のそばに住む。（Sống gần ga.）" }
+    ],
+    examples: ["城の周りには堀がある。（Xung quanh lâu đài có hào nước.）","テーブルの周りに椅子を並べる。（Xếp ghế xung quanh bàn.）"]
+  },
+  {
+    q: "店の前に長い（　　）ができている。",
+    opts: ["列","範囲","中身","景色"],
+    ans: 0,
+    cat: "名詞・形状",
+    expCorrect: "「列」（れつ）= hàng, dãy. 「列ができる」là cụm từ cố định nghĩa là 'có hàng dài người xếp hàng'. Rất thông dụng.",
+    expWrong: "「範囲」= phạm vi, 「中身」= nội dung bên trong, 「景色」= phong cảnh — đều không thể kết hợp với「できる」trong ngữ cảnh này.",
+    compare: [
+      { w:"列（れつ）", def:"Hàng, dãy (người hoặc vật)", ex:"列に並ぶ。（Xếp hàng.）" },
+      { w:"行列（ぎょうれつ）", def:"Hàng dài (thường người đông)", ex:"行列ができる人気店。（Quán nổi tiếng có hàng dài.）" },
+      { w:"並び（ならび）", def:"Sự xếp hàng, dãy", ex:"順番待ちの並び。（Hàng chờ theo thứ tự.）" }
+    ],
+    examples: ["人気店には毎朝長い列ができる。（Mỗi sáng quán nổi tiếng đều có hàng dài.）","列を作って待つ。（Xếp hàng đứng chờ.）"]
+  },
+  {
+    q: "この漢字はテスト（　　）に入る。",
+    opts: ["内容","範囲","中身","特徴"],
+    ans: 1,
+    cat: "学習・教育",
+    expCorrect: "「範囲」（はんい）= phạm vi. 「テスト範囲」= phạm vi ôn thi — cụm từ cực kỳ thông dụng trong học đường Nhật.",
+    expWrong: "「内容」= nội dung (chung chung), 「中身」= bên trong vật lý, 「特徴」= đặc điểm. Không câu nào tự nhiên bằng 範囲.",
+    compare: [
+      { w:"範囲（はんい）", def:"Phạm vi (giới hạn cụ thể)", ex:"試験範囲を確認する。（Kiểm tra phạm vi thi.）" },
+      { w:"内容（ないよう）", def:"Nội dung (thông tin chứa đựng)", ex:"授業の内容を復習する。（Ôn lại nội dung bài học.）" },
+      { w:"領域（りょういき）", def:"Lĩnh vực, vùng (học thuật)", ex:"専門領域の研究。（Nghiên cứu lĩnh vực chuyên môn.）" }
+    ],
+    examples: ["次のテストの範囲は第3章までです。（Phạm vi thi tới là đến chương 3.）","出題範囲を先生に聞く。（Hỏi giáo viên về phạm vi đề thi.）"]
+  },
+  {
+    q: "授業の（　　）を見直す。",
+    opts: ["内容","中身","範囲","列"],
+    ans: 0,
+    cat: "学習・教育",
+    expCorrect: "「内容」（ないよう）= nội dung. 「授業の内容を見直す」= xem lại nội dung bài học — hoàn toàn tự nhiên và thông dụng.",
+    expWrong: "「中身」thường dùng cho vật thể có thể mở ra xem bên trong. 「範囲」= phạm vi, 「列」= hàng dãy — không phù hợp.",
+    compare: [
+      { w:"内容（ないよう）", def:"Nội dung (thông tin, ý tưởng)", ex:"メールの内容を確認する。（Kiểm tra nội dung email.）" },
+      { w:"中身（なかみ）", def:"Bên trong, nội dung vật lý", ex:"箱の中身を見る。（Xem bên trong hộp.）" },
+      { w:"要点（ようてん）", def:"Điểm chính, trọng tâm", ex:"授業の要点をまとめる。（Tóm tắt trọng tâm bài học.）" }
+    ],
+    examples: ["会議の内容を記録する。（Ghi lại nội dung cuộc họp.）","授業内容が難しすぎる。（Nội dung bài học khó quá.）"]
+  },
+  {
+    q: "箱の（　　）を見る。",
+    opts: ["内容","中身","範囲","景色"],
+    ans: 1,
+    cat: "物・具体",
+    expCorrect: "「中身」（なかみ）= bên trong, thứ chứa bên trong (mang tính vật lý). Dùng khi mở hộp, gói, vali ra để xem.",
+    expWrong: "「内容」cũng có thể dùng nhưng mang tính trừu tượng hơn (nội dung, thông tin). 「箱の中身」tự nhiên hơn 「箱の内容」trong ngữ cảnh vật lý.",
+    compare: [
+      { w:"中身（なかみ）", def:"Thứ bên trong (vật lý, cụ thể)", ex:"バッグの中身を全部出す。（Lấy hết đồ trong túi ra.）" },
+      { w:"内容（ないよう）", def:"Nội dung (thông tin, ý nghĩa)", ex:"報告書の内容を読む。（Đọc nội dung báo cáo.）" },
+      { w:"中（なか）", def:"Bên trong (vị trí)", ex:"引き出しの中に入れる。（Để vào trong ngăn kéo.）" }
+    ],
+    examples: ["プレゼントの中身が気になる。（Tò mò về thứ bên trong quà.）","財布の中身を確認する。（Kiểm tra bên trong ví.）"]
+  },
+  {
+    q: "商品の（　　）を教えてください。",
+    opts: ["普通","特徴","内容","景色"],
+    ans: 1,
+    cat: "特性・説明",
+    expCorrect: "「特徴」（とくちょう）= đặc điểm nổi bật, tính năng. Rất thông dụng trong bán hàng, giới thiệu sản phẩm.",
+    expWrong: "「内容」có thể dùng nhưng thường hỏi về thành phần, không phải đặc điểm. 「普通」= bình thường, 「景色」= phong cảnh — không liên quan.",
+    compare: [
+      { w:"特徴（とくちょう）", def:"Đặc điểm nổi bật, đặc trưng", ex:"この製品の特徴は軽さだ。（Đặc điểm của sản phẩm này là nhẹ.）" },
+      { w:"特長（とくちょう）", def:"Ưu điểm, điểm mạnh (tích cực)", ex:"彼女の特長は明るさだ。（Điểm mạnh của cô ấy là tính vui vẻ.）" },
+      { w:"特性（とくせい）", def:"Đặc tính, tính chất (khoa học/kỹ thuật)", ex:"この素材の特性を研究する。（Nghiên cứu đặc tính vật liệu này.）" }
+    ],
+    examples: ["この商品の特徴を3つ挙げてください。（Hãy nêu 3 đặc điểm của sản phẩm này.）","彼の特徴は背が高いことだ。（Đặc điểm của anh ấy là cao.）"]
+  },
+  {
+    q: "それは（　　）のことだ。",
+    opts: ["普通","当たり前","特徴","中身"],
+    ans: 1,
+    cat: "価値観・常識",
+    expCorrect: "「当たり前」（あたりまえ）= điều hiển nhiên, đương nhiên. Dùng khi muốn nói điều gì đó là lẽ dĩ nhiên, không cần giải thích.",
+    expWrong: "「普通」= bình thường (mức độ trung bình). Khác biệt: 「当たり前」mang tính logic/đạo lý, 「普通」mang tính thống kê/xã hội.",
+    compare: [
+      { w:"当たり前（あたりまえ）", def:"Đương nhiên, lẽ dĩ nhiên", ex:"ありがとうと言うのは当たり前だ。（Nói cảm ơn là điều hiển nhiên.）" },
+      { w:"普通（ふつう）", def:"Bình thường, thông thường", ex:"普通の生活を送る。（Sống cuộc sống bình thường.）" },
+      { w:"常識（じょうしき）", def:"Thường thức, kiến thức phổ thông", ex:"それは常識だ。（Đó là thường thức.）" }
+    ],
+    examples: ["努力するのは当たり前だ。（Nỗ lực là điều đương nhiên.）","家族を大切にするのは当たり前のことだ。（Trân trọng gia đình là lẽ đương nhiên.）"]
+  },
+  {
+    q: "これは（　　）だよ。",
+    opts: ["国際","国籍","偽札","内容"],
+    ans: 2,
+    cat: "社会・法律",
+    expCorrect: "「偽札」（にせさつ）= tiền giả. Câu này muốn nói 'Cái này là tiền giả đấy!' — ngữ cảnh cảnh báo hoặc phát hiện.",
+    expWrong: "「国際」= quốc tế, 「国籍」= quốc tịch, 「内容」= nội dung — đều không phù hợp ngữ cảnh nói về tờ tiền.",
+    compare: [
+      { w:"偽札（にせさつ）", def:"Tiền giả (tờ tiền)", ex:"偽札を使うと逮捕される。（Dùng tiền giả sẽ bị bắt.）" },
+      { w:"偽物（にせもの）", def:"Hàng giả, đồ giả mạo", ex:"これは偽物のブランドバッグだ。（Đây là túi hiệu hàng nhái.）" },
+      { w:"本物（ほんもの）", def:"Hàng thật, đồ thật", ex:"これは本物の金だ。（Đây là vàng thật.）" }
+    ],
+    examples: ["この1万円札は偽札らしい。（Tờ 10,000 yên này có vẻ là tiền giả.）","偽札を見分ける方法を学ぶ。（Học cách phân biệt tiền giả.）"]
+  },
+  {
+    q: "彼の（　　）は日本だ。",
+    opts: ["国際","国籍","範囲","内容"],
+    ans: 1,
+    cat: "社会・アイデンティティ",
+    expCorrect: "「国籍」（こくせき）= quốc tịch. 「彼の国籍は日本だ」= Quốc tịch của anh ấy là Nhật Bản.",
+    expWrong: "「国際」= tính từ/danh từ quốc tế, không phải quốc tịch. 「範囲」「内容」không liên quan.",
+    compare: [
+      { w:"国籍（こくせき）", def:"Quốc tịch", ex:"二重国籍を持つ人。（Người có hai quốc tịch.）" },
+      { w:"出身（しゅっしん）", def:"Quê quán, xuất thân", ex:"彼の出身は大阪だ。（Quê anh ấy là Osaka.）" },
+      { w:"国（くに）", def:"Đất nước, quê hương", ex:"あなたの国はどこですか？（Nước bạn là nước nào?）" }
+    ],
+    examples: ["外国人登録には国籍が必要だ。（Đăng ký người nước ngoài cần có quốc tịch.）","彼女は日本国籍を取得した。（Cô ấy đã lấy quốc tịch Nhật Bản.）"]
+  },
+  {
+    q: "それは（　　）問題になった。",
+    opts: ["国際","国籍","内容","特徴"],
+    ans: 0,
+    cat: "社会・ニュース",
+    expCorrect: "「国際」（こくさい）= quốc tế. 「国際問題」= vấn đề quốc tế — cụm từ cố định, rất thông dụng trong báo chí.",
+    expWrong: "「国籍問題」không tự nhiên trong ngữ cảnh này. 「内容問題」「特徴問題」không tồn tại.",
+    compare: [
+      { w:"国際（こくさい）", def:"Quốc tế (nhiều nước)", ex:"国際会議、国際交流、国際結婚" },
+      { w:"海外（かいがい）", def:"Nước ngoài (góc nhìn từ Nhật)", ex:"海外旅行に行く。（Đi du lịch nước ngoài.）" },
+      { w:"外国（がいこく）", def:"Nước ngoài (nói chung)", ex:"外国語を勉強する。（Học ngoại ngữ.）" }
+    ],
+    examples: ["環境問題は国際問題となっている。（Vấn đề môi trường trở thành vấn đề quốc tế.）","国際社会の注目を集めた。（Thu hút sự chú ý của cộng đồng quốc tế.）"]
+  },
+  {
+    q: "大（　　）の中で過ごしたい。",
+    opts: ["景色","自然","内容","普通"],
+    ans: 1,
+    cat: "自然・環境",
+    expCorrect: "「大自然」（だいしぜん）= thiên nhiên hùng vĩ, đại tự nhiên. 「大自然の中で過ごす」= dành thời gian giữa thiên nhiên hùng vĩ — cụm từ thơ mộng, hay dùng trong văn viết.",
+    expWrong: "「大景色」không tồn tại. 「大内容」「大普通」cũng không có nghĩa. Câu này kiểm tra compound「大＋名詞」.",
+    compare: [
+      { w:"大自然（だいしぜん）", def:"Đại tự nhiên, thiên nhiên hùng vĩ", ex:"大自然の中でキャンプする。（Cắm trại giữa thiên nhiên hùng vĩ.）" },
+      { w:"自然（しぜん）", def:"Tự nhiên (nói chung)", ex:"自然が好きだ。（Tôi thích thiên nhiên.）" },
+      { w:"自然界（しぜんかい）", def:"Giới tự nhiên, thế giới tự nhiên", ex:"自然界の法則。（Quy luật của tự nhiên.）" }
+    ],
+    examples: ["北海道の大自然に感動した。（Bị cảm động bởi thiên nhiên hùng vĩ của Hokkaido.）","大自然の中でリフレッシュしたい。（Muốn tái tạo năng lượng giữa thiên nhiên.）"]
+  },
+  {
+    q: "好きな人といたいのは（　　）なことだ。",
+    opts: ["普通","自然","特徴","内容"],
+    ans: 1,
+    cat: "感情・心理",
+    expCorrect: "「自然（しぜん）なこと」= điều tự nhiên, thuận lẽ tự nhiên. Dùng khi muốn nói điều gì đó là bản năng, không cưỡng ép được.",
+    expWrong: "「普通のこと」cũng chấp nhận được nhưng 「自然なこと」hay hơn vì muốn nhấn mạnh đây là bản năng cảm xúc, không phải chỉ 'thông thường'.",
+    compare: [
+      { w:"自然（しぜん）な", def:"Tự nhiên, thuận theo bản năng", ex:"笑顔が自然な人。（Người có nụ cười tự nhiên.）" },
+      { w:"普通（ふつう）の", def:"Bình thường, thông thường", ex:"普通の生活。（Cuộc sống bình thường.）" },
+      { w:"当然（とうぜん）の", def:"Đương nhiên, tất nhiên", ex:"当然の結果だ。（Kết quả tất nhiên thôi.）" }
+    ],
+    examples: ["子どもが親を慕うのは自然なことだ。（Trẻ con thương cha mẹ là điều tự nhiên.）","失敗を恐れるのも自然な感情だ。（Sợ thất bại cũng là cảm xúc tự nhiên.）"]
+  },
+  {
+    q: "素晴らしい（　　）だった。",
+    opts: ["内容","景色","範囲","中身"],
+    ans: 1,
+    cat: "感覚・描写",
+    expCorrect: "「景色」（けしき）= phong cảnh. 「素晴らしい景色」= phong cảnh tuyệt vời — kết hợp rất tự nhiên và hay gặp trong văn du lịch.",
+    expWrong: "「素晴らしい内容」cũng dùng được nhưng thường kết hợp với bài giảng, bài viết. Đây không có ngữ cảnh rõ nên 景色 là đáp án hay nhất.",
+    compare: [
+      { w:"景色（けしき）", def:"Phong cảnh (nhìn từ một điểm)", ex:"窓から景色を眺める。（Ngắm phong cảnh qua cửa sổ.）" },
+      { w:"風景（ふうけい）", def:"Phong cảnh (rộng hơn, nghệ thuật hơn)", ex:"田舎の風景が好きだ。（Tôi thích phong cảnh nông thôn.）" },
+      { w:"眺め（ながめ）", def:"Cảnh nhìn từ trên cao/xa", ex:"山頂からの眺めが最高だ。（Cảnh từ đỉnh núi đẹp tuyệt.）" }
+    ],
+    examples: ["富士山から見た景色は絶景だった。（Phong cảnh nhìn từ núi Phú Sĩ thật tuyệt vời.）","夕焼けの景色に見惚れた。（Bị hút hồn bởi cảnh hoàng hôn.）"]
+  },
+  {
+    q: "荷物が（　　）。",
+    opts: ["届いた","届けた","当たった","返した"],
+    ans: 0,
+    cat: "動詞・自他",
+    expCorrect: "「届く」（とどく）= đến nơi, được giao đến (自動詞 — tự động từ, không cần tân ngữ). Chủ thể 「荷物」tự đến.",
+    expWrong: "「届ける」= giao đến (他動詞 — cần tân ngữ + người thực hiện). 「当たった」= trúng, 「返した」= trả lại — nghĩa khác.",
+    compare: [
+      { w:"届く（とどく）", def:"Đến nơi, tới được (tự động từ)", ex:"手紙が届いた。（Thư đã đến.）" },
+      { w:"届ける（とどける）", def:"Giao, chuyển đến (tha động từ)", ex:"荷物を届ける。（Giao hàng.）" },
+      { w:"着く（つく）", def:"Đến nơi (người hoặc phương tiện)", ex:"駅に着く。（Đến ga.）" }
+    ],
+    examples: ["注文した本が届いた。（Sách đặt mua đã được giao.）","メッセージが届かなかった。（Tin nhắn không đến được.）"]
+  },
+  {
+    q: "警察に財布を（　　）。",
+    opts: ["届く","届ける","返る","助かる"],
+    ans: 1,
+    cat: "動詞・自他",
+    expCorrect: "「届ける」= nộp, giao nộp (他動詞). 「警察に財布を届ける」= nộp ví cho cảnh sát. Người thực hiện hành động giao nộp.",
+    expWrong: "「届く」là tự động từ — không thể dùng với tân ngữ 「財布を」. Đây là cặp tự/他 quan trọng cần phân biệt.",
+    compare: [
+      { w:"届ける", def:"Nộp/giao (tha động từ, chủ động)", ex:"忘れ物を届ける。（Nộp đồ bỏ quên.）" },
+      { w:"届く", def:"Được giao đến (tự động từ, bị động tự nhiên)", ex:"商品が届く。（Hàng được giao đến.）" },
+      { w:"提出する（ていしゅつ）", def:"Nộp (văn bản, bài tập)", ex:"書類を提出する。（Nộp tài liệu.）" }
+    ],
+    examples: ["拾ったお金を警察に届けた。（Đã nộp tiền nhặt được cho cảnh sát.）","届け出が必要だ。（Cần phải khai báo.）"]
+  },
+  {
+    q: "頭を（　　）。",
+    opts: ["かく","つかむ","にぎる","押さえる"],
+    ans: 3,
+    cat: "動詞・コロケーション",
+    expCorrect: "「頭を押さえる」= đặt tay lên đầu, ôm đầu (khi đau hoặc bối rối). Đây là collocation tự nhiên trong tiếng Nhật.",
+    expWrong: "「頭をかく」= gãi đầu (khi ngượng ngùng) cũng đúng! Câu này khá mơ hồ. Tuy nhiên 押さえる thường gặp hơn trong ngữ cảnh đau đầu.",
+    compare: [
+      { w:"押さえる（おさえる）", def:"Đè, giữ chặt, ôm", ex:"傷口を押さえる。（Ôm vết thương.）" },
+      { w:"頭をかく", def:"Gãi đầu (biểu hiện ngượng/bối rối)", ex:"恥ずかしくて頭をかいた。（Ngượng quá gãi đầu.）" },
+      { w:"つかむ", def:"Nắm, chộp lấy", ex:"手首をつかむ。（Nắm lấy cổ tay.）" }
+    ],
+    examples: ["頭を押さえながら「痛い」と言った。（Vừa ôm đầu vừa nói 'Đau quá'.）","相手の肩を押さえる。（Đè vai đối phương xuống.）"]
+  },
+  {
+    q: "汗を（　　）。",
+    opts: ["つかむ","かく","にぎる","合わせる"],
+    ans: 1,
+    cat: "動詞・コロケーション",
+    expCorrect: "「汗をかく」= đổ mồ hôi. Đây là collocation CỐ ĐỊNH — không thể thay bằng từ khác. Học thuộc!",
+    expWrong: "「汗をつかむ」「汗をにぎる」đều sai ngữ pháp — không thể 'nắm' mồ hôi. Collocation cố định phải học thuộc.",
+    compare: [
+      { w:"汗をかく", def:"Đổ mồ hôi (collocation cố định)", ex:"運動して汗をかいた。（Tập thể dục đổ mồ hôi.）" },
+      { w:"恥をかく", def:"Bị망신, xấu hổ trước mặt người", ex:"人前で恥をかいた。（Bị망신trước mặt mọi người.）" },
+      { w:"夢をかなえる", def:"Thực hiện giấc mơ (cũng có 「かく」khác nghĩa)", ex:"Note: かく(汗) khác かく(書く) khác かく(夢をかなえる)" }
+    ],
+    examples: ["緊張して冷や汗をかいた。（Lo lắng đổ mồ hôi lạnh.）","夏は大汗をかく。（Mùa hè đổ mồ hôi nhiều.）"]
+  },
+  {
+    q: "チャンスを（　　）。",
+    opts: ["にぎる","つかむ","押さえる","当てる"],
+    ans: 1,
+    cat: "動詞・比喩",
+    expCorrect: "「チャンスをつかむ」= nắm bắt cơ hội. Dùng nghĩa bóng — 「つかむ」mang ý nghĩa chủ động đạt được, nắm lấy.",
+    expWrong: "「チャンスをにぎる」ít tự nhiên hơn. 「にぎる」thiên về nắm vật cụ thể, 「つかむ」dùng được cả nghĩa bóng.",
+    compare: [
+      { w:"つかむ", def:"Chộp, nắm lấy (cả nghĩa đen lẫn bóng)", ex:"夢をつかむ / チャンスをつかむ" },
+      { w:"にぎる", def:"Nắm, giữ (chủ yếu vật lý)", ex:"ボールをにぎる / 手をにぎる" },
+      { w:"捉える（とらえる）", def:"Nắm bắt, hiểu được (trừu tượng)", ex:"チャンスを捉える（văn viết hơn）" }
+    ],
+    examples: ["この機会をつかんでください。（Hãy nắm bắt cơ hội này.）","心をつかむ話し方。（Cách nói chuyện thu phục lòng người.）"]
+  },
+  {
+    q: "おにぎりを（　　）。",
+    opts: ["つかむ","にぎる","押さえる","比べる"],
+    ans: 1,
+    cat: "動詞・動作",
+    expCorrect: "「おにぎりをにぎる」= nắm cơm nắm. 「にぎる」= nắm, bóp, vo thành hình. Thú vị: 「おにぎり」có gốc từ 「にぎる」!",
+    expWrong: "「おにぎりをつかむ」= cầm/chộp nắm cơm (cũng có thể hiểu được, nhưng 「にぎる」là chính xác vì là hành động tạo ra おにぎり).",
+    compare: [
+      { w:"にぎる", def:"Nắm chặt, vo tròn thành hình", ex:"ご飯をにぎる。/ 拳（こぶし）をにぎる。" },
+      { w:"つかむ", def:"Chộp, cầm lấy (nhanh, chủ động)", ex:"肩をつかむ。/ チャンスをつかむ。" },
+      { w:"持つ（もつ）", def:"Cầm, giữ (trạng thái)", ex:"傘を持つ。（Cầm ô.）" }
+    ],
+    examples: ["母はよくおにぎりをにぎってくれた。（Mẹ thường hay nắm cơm nắm cho tôi.）","しっかりにぎってください。（Hãy nắm chặt vào.）"]
+  },
+  {
+    q: "お腹を（　　）。",
+    opts: ["押さえる","にぎる","つかむ","合わせる"],
+    ans: 0,
+    cat: "動詞・動作",
+    expCorrect: "「お腹を押さえる」= ôm bụng (đau bụng, đói, hoặc cười). Rất tự nhiên và thông dụng trong hội thoại.",
+    expWrong: "「お腹をにぎる」「お腹をつかむ」không tự nhiên. 「合わせる」không phù hợp ngữ cảnh.",
+    compare: [
+      { w:"押さえる（おさえる）", def:"Đè, ôm, giữ (một vùng cơ thể)", ex:"胸を押さえる。/ 口を押さえる。" },
+      { w:"さする", def:"Xoa nhẹ nhàng", ex:"お腹をさする。（Xoa bụng.）" },
+      { w:"かかえる（抱える）", def:"Ôm (bằng cả hai tay)", ex:"荷物を抱える。（Ôm đồ.）" }
+    ],
+    examples: ["お腹が痛くてずっと押さえていた。（Đau bụng cứ phải ôm mãi.）","笑いすぎてお腹を押さえた。（Cười nhiều đến phải ôm bụng.）"]
+  },
+  {
+    q: "目的地に（　　）。",
+    opts: ["近づく","近づける","合わせる","比べる"],
+    ans: 0,
+    cat: "動詞・自他",
+    expCorrect: "「近づく」（ちかづく）= tiến gần lại (自動詞). 「目的地に近づく」= tiến gần đến điểm đích — chủ thể tự di chuyển.",
+    expWrong: "「近づける」= làm cho cái gì tiến gần (他動詞). Phân biệt: 「近づく」= tôi đến gần, 「近づける」= tôi đưa cái gì đó đến gần.",
+    compare: [
+      { w:"近づく（ちかづく）", def:"Tiến gần, đến gần (tự động từ)", ex:"春が近づく。（Mùa xuân đang đến gần.）" },
+      { w:"近づける（ちかづける）", def:"Đưa lại gần, làm tiến gần (tha động từ)", ex:"顔を近づける。（Đưa mặt lại gần.）" },
+      { w:"接近する（せっきん）", def:"Tiếp cận, đến gần (văn viết)", ex:"台風が接近している。（Bão đang tiếp cận.）" }
+    ],
+    examples: ["締め切りが近づいてきた。（Hạn chót đang đến gần.）","危険に近づくな。（Đừng tiếp cận nơi nguy hiểm.）"]
+  },
+  {
+    q: "顔を（　　）。",
+    opts: ["近づく","近づける","押さえる","当たる"],
+    ans: 1,
+    cat: "動詞・自他",
+    expCorrect: "「顔を近づける」= đưa mặt lại gần (他動詞). Chủ thể chủ động đưa mặt mình đến gần cái gì đó.",
+    expWrong: "「顔を近づく」sai ngữ pháp — 「近づく」là tự động từ, không kết hợp với tân ngữ 「を」.",
+    compare: [
+      { w:"近づける", def:"Đưa [vật] đến gần (tha động từ)", ex:"耳を近づける。（Áp tai lại gần.）" },
+      { w:"近づく", def:"[Chủ thể] tiến lại gần (tự động từ)", ex:"犬が近づいてきた。（Chó tiến lại gần.）" },
+      { w:"寄せる（よせる）", def:"Kéo/đưa lại gần (tha động từ)", ex:"椅子を寄せる。（Kéo ghế lại gần.）" }
+    ],
+    examples: ["スマホを目に近づけすぎないように。（Đừng đưa điện thoại lại quá gần mắt.）","彼女は花に顔を近づけてにおいをかいだ。（Cô ấy đưa mặt gần hoa để ngửi.）"]
+  },
+  {
+    q: "力を（　　）。",
+    opts: ["合わせる","比べる","当てる","似る"],
+    ans: 0,
+    cat: "動詞・コロケーション",
+    expCorrect: "「力を合わせる」（ちからをあわせる）= hợp sức, đoàn kết cùng nhau. Đây là thành ngữ rất thông dụng.",
+    expWrong: "「力を比べる」= so sánh sức mạnh (dùng được nhưng không tự nhiên bằng với ngữ cảnh hợp tác). 「当てる」「似る」không phù hợp.",
+    compare: [
+      { w:"力を合わせる", def:"Hợp sức, cùng nhau cố gắng", ex:"チームで力を合わせる。（Hợp sức cùng team.）" },
+      { w:"手を合わせる", def:"Chắp tay cầu nguyện/xin lỗi", ex:"お寺で手を合わせる。（Chắp tay cầu nguyện ở chùa.）" },
+      { w:"息を合わせる（いきをあわせる）", def:"Đồng bộ, nhịp nhàng cùng nhau", ex:"息を合わせて演奏する。（Chơi nhạc đồng điệu.）" }
+    ],
+    examples: ["みんなで力を合わせてこの問題を解決しよう。（Hãy cùng nhau hợp sức giải quyết vấn đề này.）"]
+  },
+  {
+    q: "宝くじが（　　）。",
+    opts: ["当たる","当てる","比べる","似る"],
+    ans: 0,
+    cat: "動詞・自他",
+    expCorrect: "「宝くじが当たる」= trúng xổ số (自動詞). Chủ thể là 「宝くじ」— tờ vé số 'tự trúng'. Nghĩa may mắn.",
+    expWrong: "「宝くじを当てる」cũng có thể dùng nghĩa 'đoán trúng' nhưng ít tự nhiên hơn 「当たる」trong ngữ cảnh này.",
+    compare: [
+      { w:"当たる（あたる）", def:"Trúng, chạm vào (tự động từ)", ex:"くじに当たる。/ ボールが当たる。" },
+      { w:"当てる（あてる）", def:"Đoán ra, đặt vào, chiếu vào (tha động từ)", ex:"答えを当てる。/ 光を当てる。" },
+      { w:"外れる（はずれる）", def:"Trượt, sai, không trúng", ex:"くじが外れた。（Vé số không trúng.）" }
+    ],
+    examples: ["宝くじで1億円当たった！（Trúng xổ số 100 triệu yên!）","予想が当たった。（Dự đoán trúng rồi.）"]
+  },
+  {
+    q: "答えを（　　）。",
+    opts: ["当たる","当てる","合わせる","押さえる"],
+    ans: 1,
+    cat: "動詞・自他",
+    expCorrect: "「答えを当てる」= đoán ra đáp án (他動詞). Người học chủ động đoán và nêu đáp án.",
+    expWrong: "「答えが当たる」= đáp án trúng (đúng) — chủ ngữ là đáp án. Khác nhau ở chỗ: 「を当てる」nhấn mạnh hành động đoán, 「が当たる」nhấn mạnh kết quả.",
+    compare: [
+      { w:"当てる（あてる）", def:"Đoán ra, chỉ đúng (tha động từ)", ex:"名前を当てる。（Đoán tên.）" },
+      { w:"当たる（あたる）", def:"Trúng, đúng (tự động từ, kết quả)", ex:"予想が当たった。（Dự đoán trúng.）" },
+      { w:"正解する（せいかいする）", def:"Trả lời đúng", ex:"全問正解した。（Trả lời đúng tất cả câu.）" }
+    ],
+    examples: ["犯人を当ててみてください。（Hãy thử đoán xem ai là thủ phạm.）","この問題の答えを当ててみて。（Thử đoán đáp án câu này xem.）"]
+  },
+  {
+    q: "去年と（　　）。",
+    opts: ["合わせる","比べる","似る","当てる"],
+    ans: 1,
+    cat: "動詞・比較",
+    expCorrect: "「去年と比べる」= so sánh với năm ngoái. 「と比べる」là cấu trúc so sánh thông dụng. 「Aと比べてB」= So với A thì B.",
+    expWrong: "「去年と合わせる」= kết hợp với năm ngoái — không có nghĩa logic. 「似る」「当てる」không phù hợp.",
+    compare: [
+      { w:"比べる（くらべる）", def:"So sánh (chủ động, tha động từ)", ex:"値段を比べる。（So sánh giá.）" },
+      { w:"比較する（ひかくする）", def:"So sánh (văn viết, trang trọng hơn)", ex:"二つの案を比較する。（So sánh hai phương án.）" },
+      { w:"対比する（たいひする）", def:"Đối chiếu, tương phản", ex:"白と黒を対比させる。（Đối chiếu đen trắng.）" }
+    ],
+    examples: ["去年と比べると売り上げが増えた。（So với năm ngoái doanh thu tăng.）","他の人と比べないようにしよう。（Đừng so sánh bản thân với người khác.）"]
+  },
+  {
+    q: "彼は着物がよく（　　）。",
+    opts: ["似る","似合う","比べる","合わせる"],
+    ans: 1,
+    cat: "動詞・適合",
+    expCorrect: "「似合う」（にあう）= hợp, trông đẹp khi mặc/đeo. 「着物が似合う」= mặc kimono trông đẹp. Chủ thể là người, tân ngữ là trang phục/vật trang trí.",
+    expWrong: "「似る」= giống (di truyền, ngoại hình). 「彼は着物に似る」sai — 「似る」không dùng cho quần áo.",
+    compare: [
+      { w:"似合う（にあう）", def:"Hợp, phù hợp với ngoại hình", ex:"その色が似合っている。（Màu đó hợp với bạn.）" },
+      { w:"似る（にる）", def:"Giống, trông giống", ex:"父に似ている。（Giống bố.）" },
+      { w:"合う（あう）", def:"Vừa vặn, phù hợp (kích thước)", ex:"サイズが合う。（Vừa size.）" }
+    ],
+    examples: ["彼女には赤が似合う。（Màu đỏ hợp với cô ấy.）","その帽子、すごく似合ってるね！（Cái mũ đó hợp với bạn lắm!）"]
+  },
+  {
+    q: "母に（　　）。",
+    opts: ["似る","似合う","当てる","合わせる"],
+    ans: 0,
+    cat: "動詞・類似",
+    expCorrect: "「母に似る」= giống mẹ (di truyền, ngoại hình hoặc tính cách). 「に似る」là cấu trúc chỉ sự giống nhau.",
+    expWrong: "「母に似合う」sai — 「似合う」không dùng với người. 「似合う」dùng khi 'hợp với' trang phục, phong cách.",
+    compare: [
+      { w:"似る（にる）", def:"Giống (người, vật, tính cách)", ex:"父に顔が似ている。（Mặt giống bố.）" },
+      { w:"そっくり", def:"Giống hệt (hoàn toàn)", ex:"母とそっくりだ。（Giống mẹ y chang.）" },
+      { w:"似たり寄ったり（にたりよったり）", def:"Gần như nhau, na ná nhau", ex:"どちらも似たり寄ったりだ。（Cái nào cũng na ná nhau.）" }
+    ],
+    examples: ["彼は声が父親に似ている。（Giọng anh ấy giống bố.）","性格は母に似た。（Tính cách giống mẹ.）"]
+  },
+  {
+    q: "トイレは男女に（　　）。",
+    opts: ["分ける","分かれる","増える","減る"],
+    ans: 1,
+    cat: "動詞・自他",
+    expCorrect: "「分かれる」（わかれる）= được chia, tách ra (自動詞). 「男女に分かれる」= tự nhiên được chia thành nam nữ (không ai chủ động chia).",
+    expWrong: "「分ける」= chia (他動詞, cần người thực hiện). Nếu câu là 「管理者がトイレを男女に分ける」thì dùng 分ける.",
+    compare: [
+      { w:"分かれる（わかれる）", def:"Được chia, tách ra (tự động từ)", ex:"道が二つに分かれる。（Con đường tách làm đôi.）" },
+      { w:"分ける（わける）", def:"Chia ra, phân chia (tha động từ)", ex:"料理を均等に分ける。（Chia đồ ăn đều nhau.）" },
+      { w:"別れる（わかれる）", def:"Chia tay, xa cách (người)", ex:"彼女と別れた。（Chia tay người yêu.）" }
+    ],
+    examples: ["クラスはAとBに分かれた。（Lớp được chia thành A và B.）","意見が二つに分かれた。（Ý kiến chia làm hai.）"]
+  },
+  {
+    q: "財産を3人で（　　）。",
+    opts: ["分かれる","分ける","増える","減る"],
+    ans: 1,
+    cat: "動詞・自他",
+    expCorrect: "「分ける」（わける）= chia cho (他動詞). 「財産を3人で分ける」= 3 người chia tài sản — có người chủ động thực hiện hành động chia.",
+    expWrong: "「分かれる」là tự động từ — không dùng với tân ngữ 「財産を」. Đây là cặp tự/他 hay ra thi.",
+    compare: [
+      { w:"分ける", def:"Chia (tha động từ, có người chia)", ex:"仕事を分ける。（Chia việc.）" },
+      { w:"分かれる", def:"Tách ra (tự động từ, tự nhiên)", ex:"グループが分かれる。（Nhóm tách ra.）" },
+      { w:"配る（くばる）", def:"Phân phát, chia cho từng người", ex:"プリントを配る。（Phát tờ in.）" }
+    ],
+    examples: ["遺産を兄弟で分けた。（Chia thừa kế giữa anh chị em.）","お菓子をみんなで分けて食べた。（Chia nhau ăn bánh kẹo.）"]
+  },
+  {
+    q: "体重が（　　）。",
+    opts: ["増える","分ける","変える","比べる"],
+    ans: 0,
+    cat: "動詞・変化",
+    expCorrect: "「体重が増える」= cân nặng tăng (自動詞). Chủ thể 「体重」tự tăng — không ai tăng nó cả.",
+    expWrong: "「体重を増やす」= làm tăng cân (他動詞, có người cố ý tăng). 「変える」「比べる」không phù hợp.",
+    compare: [
+      { w:"増える（ふえる）", def:"Tăng, nhiều thêm (tự động từ)", ex:"収入が増える。（Thu nhập tăng.）" },
+      { w:"増やす（ふやす）", def:"Làm tăng, tăng lên (tha động từ)", ex:"筋肉を増やす。（Tăng cơ bắp.）" },
+      { w:"太る（ふとる）", def:"Tăng cân, béo lên", ex:"最近太った。（Gần đây tôi tăng cân.）" }
+    ],
+    examples: ["運動不足で体重が増えた。（Thiếu vận động làm cân nặng tăng.）","売り上げが増えた。（Doanh thu tăng.）"]
+  },
+  {
+    q: "人口が（　　）。",
+    opts: ["減る","分ける","合わせる","当てる"],
+    ans: 0,
+    cat: "動詞・変化",
+    expCorrect: "「人口が減る」= dân số giảm (自動詞). Đây là chủ đề xã hội quan trọng ở Nhật Bản — 少子高齢化 (dân số già, ít trẻ em).",
+    expWrong: "「人口を減らす」= làm giảm dân số (他動詞, có chủ thể). 「分ける」「合わせる」「当てる」không phù hợp.",
+    compare: [
+      { w:"減る（へる）", def:"Giảm, ít đi (tự động từ)", ex:"水が減る。/ 仕事が減る。" },
+      { w:"減らす（へらす）", def:"Làm giảm (tha động từ)", ex:"体重を減らす。（Giảm cân.）" },
+      { w:"少なくなる（すくなくなる）", def:"Trở nên ít đi", ex:"子どもの数が少なくなっている。（Số trẻ em đang giảm dần.）" }
+    ],
+    examples: ["地方の人口が急速に減っている。（Dân số ở địa phương đang giảm nhanh.）","在庫が減ってきた。（Hàng tồn kho đang giảm.）"]
+  },
+  {
+    q: "性格が（　　）。",
+    opts: ["変わる","変える","分ける","比べる"],
+    ans: 0,
+    cat: "動詞・自他",
+    expCorrect: "「性格が変わる」= tính cách thay đổi (自動詞). 「性格」tự thay đổi theo thời gian — không ai chủ động thay đổi nó.",
+    expWrong: "「性格を変える」= thay đổi tính cách (他動詞, có người cố tình). Ngữ nghĩa khác nhau! 「変わる」= tự nhiên đổi, 「変える」= cố ý đổi.",
+    compare: [
+      { w:"変わる（かわる）", def:"Thay đổi (tự động từ, tự nhiên)", ex:"天気が変わる。（Thời tiết thay đổi.）" },
+      { w:"変える（かえる）", def:"Thay đổi (tha động từ, cố ý)", ex:"髪型を変える。（Đổi kiểu tóc.）" },
+      { w:"変化する（へんかする）", def:"Biến đổi (văn viết)", ex:"社会が変化している。（Xã hội đang biến đổi.）" }
+    ],
+    examples: ["環境が変われば人も変わる。（Môi trường thay đổi thì con người cũng thay đổi.）","気持ちが変わってしまった。（Cảm xúc đã thay đổi rồi.）"]
+  },
+  {
+    q: "席を（　　）。",
+    opts: ["変わる","変える","減る","増える"],
+    ans: 1,
+    cat: "動詞・自他",
+    expCorrect: "「席を変える」= đổi chỗ ngồi (他動詞). Người chủ động thực hiện hành động đổi chỗ của mình hoặc người khác.",
+    expWrong: "「席が変わる」= chỗ ngồi thay đổi (tự động). Ý nghĩa khác: không ai chủ động đổi mà chỗ ngồi tự đổi (ví dụ theo sơ đồ mới).",
+    compare: [
+      { w:"席を変える", def:"Đổi chỗ ngồi (chủ động)", ex:"窓際の席に変えてもらった。（Được đổi cho chỗ gần cửa sổ.）" },
+      { w:"席を替わる", def:"Hoán đổi chỗ cho nhau", ex:"席を替わってもらえますか？（Bạn có thể đổi chỗ cho tôi không?）" },
+      { w:"席を移る（うつる）", def:"Chuyển sang chỗ khác", ex:"隣の席に移る。（Chuyển sang chỗ bên cạnh.）" }
+    ],
+    examples: ["見えにくいので席を変えてもらった。（Khó nhìn nên được đổi chỗ.）","席を変えてより集中できるようになった。（Đổi chỗ rồi tập trung được hơn.）"]
+  },
+  {
+    q: "お金が（　　）。",
+    opts: ["返す","返る","助ける","譲る"],
+    ans: 1,
+    cat: "動詞・自他",
+    expCorrect: "「お金が返る」= tiền được trả lại (自動詞). Chủ thể là 「お金」— tiền tự 'quay về'. Không có người thực hiện.",
+    expWrong: "「お金を返す」= trả lại tiền (他動詞, người thực hiện trả). Câu này dùng 「お金が」nên phải là tự động từ 「返る」.",
+    compare: [
+      { w:"返る（かえる）", def:"Trở về, được trả lại (tự động từ)", ex:"貸したお金が返ってきた。（Tiền cho mượn đã được trả.）" },
+      { w:"返す（かえす）", def:"Trả lại (tha động từ)", ex:"借りたものを返す。（Trả đồ đã mượn.）" },
+      { w:"戻る（もどる）", def:"Quay lại, trở về", ex:"元の場所に戻る。（Quay lại chỗ cũ.）" }
+    ],
+    examples: ["間違えて払いすぎたお金が返ってきた。（Tiền trả nhầm quá nhiều đã được hoàn lại.）","預けたお金がやっと返ってきた。（Tiền gửi cuối cùng đã được trả về.）"]
+  },
+  {
+    q: "本を図書館に（　　）。",
+    opts: ["返る","返す","助かる","譲る"],
+    ans: 1,
+    cat: "動詞・自他",
+    expCorrect: "「本を図書館に返す」= trả sách về thư viện (他動詞). Người thực hiện hành động trả sách.",
+    expWrong: "「本が図書館に返る」= sách tự trở về thư viện — không tự nhiên, sách không tự đi. 「助かる」「譲る」không liên quan.",
+    compare: [
+      { w:"返す（かえす）", def:"Trả lại (tha động từ)", ex:"借りた本を返す。（Trả sách mượn.）" },
+      { w:"返却する（へんきゃく）", def:"Trả lại (trang trọng, công thức)", ex:"図書館に返却する。（Trả lại thư viện.）" },
+      { w:"貸す（かす）", def:"Cho mượn (ngược với 返す)", ex:"友だちに本を貸す。（Cho bạn mượn sách.）" }
+    ],
+    examples: ["期限までに本を返してください。（Hãy trả sách trước hạn.）","返却期限は来週です。（Hạn trả là tuần tới.）"]
+  },
+  {
+    q: "席を（　　）。",
+    opts: ["助ける","譲る","だます","隠す"],
+    ans: 1,
+    cat: "動詞・思いやり",
+    expCorrect: "「席を譲る」（せきをゆずる）= nhường chỗ ngồi. Đây là hành động lịch sự quan trọng trong văn hóa Nhật — nhường cho người già, phụ nữ mang thai, trẻ em.",
+    expWrong: "「席を助ける」không có nghĩa. 「だます」= lừa, 「隠す」= giấu — đều không phù hợp.",
+    compare: [
+      { w:"譲る（ゆずる）", def:"Nhường, nhượng lại", ex:"道を譲る。（Nhường đường.）" },
+      { w:"渡す（わたす）", def:"Trao, đưa cho", ex:"プレゼントを渡す。（Trao quà.）" },
+      { w:"あげる", def:"Cho, tặng", ex:"友だちにあげる。（Tặng cho bạn.）" }
+    ],
+    examples: ["お年寄りに席を譲った。（Nhường chỗ cho người cao tuổi.）","優先席は必要な人に譲りましょう。（Hãy nhường ghế ưu tiên cho người cần.）"]
+  },
+  {
+    q: "友だちに（　　）。",
+    opts: ["助かる","助ける","隠れる","埋まる"],
+    ans: 1,
+    cat: "動詞・助け",
+    expCorrect: "Lưu ý: Câu hỏi gốc「友だちに助ける」có lỗi ngữ pháp! 「助ける」là 他動詞, cần「友だちを助ける」(trợ giúp bạn). Tuy nhiên nếu ý là 'nhờ bạn giúp' thì dùng「助かる」(1). Đáp án đúng nhất là「友だちを助ける」.",
+    expWrong: "⚠ Câu hỏi cần sửa: 「友だちに」→「友だちを」. 「助ける」cần tân ngữ「を」, không phải「に」. 「隠れる」「埋まる」không liên quan.",
+    compare: [
+      { w:"助ける（たすける）", def:"Giúp đỡ, cứu (tha động từ) → を助ける", ex:"友だちを助ける。（Giúp bạn.）" },
+      { w:"助かる（たすかる）", def:"Được giúp, thoát nguy (tự động từ)", ex:"友だちに助かった。（Nhờ bạn mà tôi được giúp.）" },
+      { w:"手伝う（てつだう）", def:"Giúp việc cụ thể", ex:"友だちの引っ越しを手伝う。（Giúp bạn chuyển nhà.）" }
+    ],
+    examples: ["溺れている子どもを助けた。（Cứu đứa trẻ đang chết đuối.）","助けてくれてありがとう！（Cảm ơn vì đã giúp tôi!）"]
+  },
+  {
+    q: "人を（　　）。",
+    opts: ["盗む","だます","隠れる","埋める"],
+    ans: 1,
+    cat: "動詞・犯罪",
+    expCorrect: "「人をだます」= lừa người. 「だます」= lừa dối, gian lận. Đây là động từ hay gặp trong chủ đề pháp luật, đạo đức.",
+    expWrong: "「人を盗む」= ăn cắp người — không tự nhiên (thường dùng 「誘拐する」= bắt cóc). 「隠れる」tự động từ. 「埋める」= lấp, chôn.",
+    compare: [
+      { w:"だます", def:"Lừa dối, đánh lừa", ex:"お金をだまし取る。（Lừa lấy tiền.）" },
+      { w:"騙される（だまされる）", def:"Bị lừa (thể bị động)", ex:"詐欺にだまされた。（Bị lừa đảo.）" },
+      { w:"嘘をつく（うそをつく）", def:"Nói dối", ex:"嘘をついてはいけない。（Không được nói dối.）" }
+    ],
+    examples: ["詐欺師が老人をだました。（Kẻ lừa đảo đã lừa người cao tuổi.）","だまされないように気をつけて。（Hãy cẩn thận đừng để bị lừa.）"]
+  },
+  {
+    q: "お金を（　　）。",
+    opts: ["だます","盗む","隠れる","助かる"],
+    ans: 1,
+    cat: "動詞・犯罪",
+    expCorrect: "「お金を盗む」（ぬすむ）= ăn cắp tiền. 「盗む」= trộm, lấy cắp (tha động từ).",
+    expWrong: "「お金をだます」sai — 「だます」lừa người, không lừa vật. 「隠れる」tự động từ. 「助かる」= được giúp.",
+    compare: [
+      { w:"盗む（ぬすむ）", def:"Trộm cắp (tha động từ)", ex:"財布を盗む。（Ăn cắp ví.）" },
+      { w:"盗られる（ぬすまれる）", def:"Bị ăn cắp (thể bị động)", ex:"自転車を盗まれた。（Xe đạp bị ăn cắp.）" },
+      { w:"奪う（うばう）", def:"Giật, cướp (bạo lực hơn)", ex:"バッグを奪う。（Cướp túi.）" }
+    ],
+    examples: ["店から商品を盗んだ。（Ăn cắp hàng từ cửa hàng.）","個人情報が盗まれた。（Thông tin cá nhân bị đánh cắp.）"]
+  },
+  {
+    q: "犯人が家に（　　）。",
+    opts: ["隠す","隠れる","埋める","囲む"],
+    ans: 1,
+    cat: "動詞・自他",
+    expCorrect: "「隠れる」（かくれる）= ẩn náu, trốn (自動詞). Chủ thể là 「犯人」tự trốn — không ai giấu họ.",
+    expWrong: "「隠す」= giấu (他動詞, cần tân ngữ). 「埋める」= lấp, chôn. 「囲む」= bao vây. Phân biệt 隠す/隠れる là cặp tự/他 quan trọng.",
+    compare: [
+      { w:"隠れる（かくれる）", def:"Trốn, ẩn nấp (tự động từ)", ex:"物陰に隠れる。（Ẩn sau vật.）" },
+      { w:"隠す（かくす）", def:"Giấu đi (tha động từ)", ex:"秘密を隠す。（Giấu bí mật.）" },
+      { w:"逃げる（にげる）", def:"Chạy trốn, bỏ trốn", ex:"犯人が逃げた。（Tên tội phạm bỏ trốn.）" }
+    ],
+    examples: ["かくれんぼで上手に隠れた。（Trốn giỏi trong trò chơi ú tim.）","真実を隠すことはできない。（Không thể giấu sự thật.）"]
+  },
+  {
+    q: "お金を引き出しに（　　）。",
+    opts: ["隠れる","隠す","囲む","埋まる"],
+    ans: 1,
+    cat: "動詞・自他",
+    expCorrect: "「お金を引き出しに隠す」= giấu tiền vào ngăn kéo (他動詞). Người chủ động giấu tiền.",
+    expWrong: "「隠れる」tự động từ — không dùng với tân ngữ 「お金を」. 「囲む」= bao vây, 「埋まる」= bị chôn vùi.",
+    compare: [
+      { w:"隠す（かくす）", def:"Giấu (tha động từ)", ex:"お金を隠す。/ 気持ちを隠す。" },
+      { w:"しまう", def:"Cất vào, cất đi", ex:"大切なものをしまう。（Cất thứ quý vào.）" },
+      { w:"保管する（ほかんする）", def:"Bảo quản, lưu giữ (trang trọng)", ex:"書類を保管する。（Lưu giữ tài liệu.）" }
+    ],
+    examples: ["子どもにプレゼントを隠した。（Giấu quà với đứa trẻ.）","感情を隠して笑顔を作る。（Giấu cảm xúc, tạo nụ cười.）"]
+  },
+  {
+    q: "家が土に（　　）。",
+    opts: ["埋める","埋まる","囲む","助ける"],
+    ans: 1,
+    cat: "動詞・自他",
+    expCorrect: "「家が土に埋まる」= ngôi nhà bị chôn vùi trong đất (自動詞). Thiên tai, lở đất — nhà bị vùi một cách tự nhiên.",
+    expWrong: "「家を土に埋める」= chôn nhà xuống đất (他動詞, có người chủ động làm). Tự/他 khác nhau về ý nghĩa!",
+    compare: [
+      { w:"埋まる（うまる）", def:"Bị lấp đầy, bị chôn vùi (tự động từ)", ex:"雪に埋まる。（Bị chôn trong tuyết.）" },
+      { w:"埋める（うめる）", def:"Lấp, chôn (tha động từ)", ex:"穴を埋める。（Lấp hố.）" },
+      { w:"沈む（しずむ）", def:"Chìm xuống", ex:"船が沈む。（Tàu chìm.）" }
+    ],
+    examples: ["大雪で車が埋まった。（Xe bị chôn vùi trong tuyết lớn.）","地震で家が土砂に埋まった。（Động đất khiến nhà bị vùi trong đất đá.）"]
+  },
+  {
+    q: "穴を（　　）。",
+    opts: ["埋まる","埋める","隠す","盗む"],
+    ans: 1,
+    cat: "動詞・自他",
+    expCorrect: "「穴を埋める」（あなをうめる）= lấp hố (他動詞). Cũng dùng nghĩa bóng: 「空白を埋める」= lấp đầy khoảng trống.",
+    expWrong: "「穴が埋まる」= hố bị lấp đầy (tự động từ, tự nhiên). 「隠す」= giấu, 「盗む」= ăn cắp.",
+    compare: [
+      { w:"埋める（うめる）", def:"Lấp, chôn, điền vào (tha động từ)", ex:"空欄を埋める。（Điền vào chỗ trống.）" },
+      { w:"塞ぐ（ふさぐ）", def:"Bịt, chặn (lỗ, đường)", ex:"穴を塞ぐ。（Bịt lỗ.）" },
+      { w:"掘る（ほる）", def:"Đào (hố, đất)", ex:"穴を掘る。（Đào hố.）" }
+    ],
+    examples: ["道路の穴を埋める工事をしている。（Đang thi công lấp hố trên đường.）","心の穴を埋めてくれる人。（Người lấp đầy khoảng trống trong lòng.）"]
+  },
+  {
+    q: "テーブルを（　　）。",
+    opts: ["囲む","埋める","押さえる","返す"],
+    ans: 0,
+    cat: "動詞・動作",
+    expCorrect: "「テーブルを囲む」= quây quanh bàn. 「囲む」（かこむ）= bao vây, bao quanh. Rất thường dùng trong ngữ cảnh họp mặt gia đình, bữa ăn.",
+    expWrong: "「テーブルを埋める」không tự nhiên. 「押さえる」= đè, 「返す」= trả — đều không phù hợp.",
+    compare: [
+      { w:"囲む（かこむ）", def:"Bao quanh, vây quanh (tha động từ)", ex:"家族でテーブルを囲む。（Gia đình quây quanh bàn.）" },
+      { w:"囲まれる（かこまれる）", def:"Bị bao vây (thể bị động)", ex:"緑に囲まれた家。（Ngôi nhà được bao quanh bởi cây xanh.）" },
+      { w:"取り囲む（とりかこむ）", def:"Bao vây từ nhiều phía", ex:"ファンに取り囲まれた。（Bị fans vây quanh.）" }
+    ],
+    examples: ["家族でテーブルを囲んで食事した。（Cả gia đình quây quanh bàn ăn cơm.）","みんなでキャンプファイヤーを囲んだ。（Mọi người quây quanh đống lửa trại.）"]
+  },
+  {
+    q: "海に（　　）国だ。",
+    opts: ["囲む","囲まれている","隠す","分ける"],
+    ans: 1,
+    cat: "動詞・受身",
+    expCorrect: "「海に囲まれている」= bị bao quanh bởi biển (受身形 — thể bị động + trạng thái). Nhật Bản là đảo quốc, rất phù hợp! Cấu trúc: 「Nに囲まれている」.",
+    expWrong: "「海に囲む」sai — 「囲む」cần chủ thể người. Câu này kiểm tra thể bị động 受身 — quan trọng ở N3/N4.",
+    compare: [
+      { w:"囲まれている", def:"Đang bị bao vây (thể bị động + trạng thái liên tục)", ex:"山に囲まれた村。（Làng bao quanh bởi núi.）" },
+      { w:"に囲まれる", def:"Bị bao vây bởi N (thể bị động)", ex:"自然に囲まれた場所。（Nơi được thiên nhiên bao quanh.）" },
+      { w:"周囲（しゅうい）", def:"Xung quanh (danh từ)", ex:"周囲の状況を確認する。（Kiểm tra tình trạng xung quanh.）" }
+    ],
+    examples: ["日本は海に囲まれた島国だ。（Nhật Bản là đảo quốc bao quanh bởi biển.）","緑に囲まれた静かな家に住みたい。（Muốn sống trong ngôi nhà yên tĩnh bao quanh bởi cây xanh.）"]
+  },
+  {
+    q: "日がよく（　　）。",
+    opts: ["当てる","当たる","比べる","合わせる"],
+    ans: 1,
+    cat: "動詞・自然",
+    expCorrect: "「日が当たる」= ánh nắng chiếu vào (自動詞). Chủ thể là 「日」(ánh mặt trời) tự chiếu — không ai điều khiển.",
+    expWrong: "「日を当てる」= chiếu nắng vào (他動詞, có người chủ động chiếu). 「比べる」「合わせる」không phù hợp.",
+    compare: [
+      { w:"日が当たる", def:"Nắng chiếu vào (tự nhiên, tự động từ)", ex:"南向きの部屋は日がよく当たる。（Phòng hướng nam nắng chiếu nhiều.）" },
+      { w:"日を当てる", def:"Chiếu nắng vào (chủ động, tha động từ)", ex:"植物に日を当てる。（Chiếu nắng cho cây.）" },
+      { w:"日差し（ひざし）", def:"Ánh nắng (danh từ)", ex:"強い日差しに注意。（Cẩn thận với ánh nắng mạnh.）" }
+    ],
+    examples: ["この部屋は一日中日が当たる。（Căn phòng này cả ngày đều có nắng.）","日当たりのいい場所に引っ越した。（Chuyển đến nơi có nhiều ánh sáng mặt trời.）"]
+  }
+];
+
+let current = 0, score = 0, answered = false;
+
+function init() {
+  renderPetals();
+  showQ(0);
+}
+
+function renderPetals() {
+  const wrap = document.getElementById('petals');
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.textContent = '🌸';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (6 + Math.random() * 8) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.fontSize = (10 + Math.random() * 10) + 'px';
+    wrap.appendChild(p);
+  }
+}
+
+function showQ(idx) {
+  if (idx >= quizData.length) { showResult(); return; }
+  const d = quizData[idx];
+  answered = false;
+  document.getElementById('qCard').style.display = '';
+  document.getElementById('resultScreen').classList.remove('show');
+  document.getElementById('qNum').textContent = `問 ${idx + 1}`;
+  document.getElementById('qCategory').textContent = d.cat;
+  document.getElementById('qText').innerHTML = d.q.replace('（　　）', '<span class="blank">（　　）</span>');
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('explanation').classList.remove('show');
+  document.getElementById('explanation').innerHTML = '';
+  const wrap = document.getElementById('optionsWrap');
+  wrap.innerHTML = '';
+  const labels = ['①','②','③','④'];
+  d.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-label">${labels[i]}</span><span class="opt-text">${opt}</span>`;
+    btn.onclick = () => selectAns(i, btn);
+    wrap.appendChild(btn);
+  });
+  updateProgress(idx);
+  // animate card
+  const card = document.getElementById('qCard');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'slideIn 0.35s ease';
+}
+
+function selectAns(chosen, btn) {
+  if (answered) return;
+  answered = true;
+  const d = quizData[current];
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    if (i === d.ans) b.classList.add('correct');
+    else if (i === chosen && chosen !== d.ans) b.classList.add('wrong');
+  });
+  const isCorrect = chosen === d.ans;
+  if (isCorrect) { score++; spawnFireworks(btn); }
+  showExplanation(d, isCorrect, chosen);
+  document.getElementById('nextBtn').classList.add('show');
+  document.getElementById('scoreBadge').textContent = score + ' ✓';
+}
+
+function showExplanation(d, correct, chosen) {
+  const el = document.getElementById('explanation');
+  let html = '';
+  if (correct) {
+    html += `<div class="exp-correct"><span class="exp-icon">✅</span><div><div class="exp-title">正解！</div><div class="exp-body">${d.expCorrect}</div></div></div>`;
+  } else {
+    html += `<div class="exp-wrong-picked"><div class="exp-title red">✗ 不正解 — 正解: ${d.opts[d.ans]}</div><div class="exp-body">${d.expWrong}</div></div>`;
+    html += `<div class="exp-correct"><span class="exp-icon">💡</span><div><div class="exp-title">解説</div><div class="exp-body">${d.expCorrect}</div></div></div>`;
+  }
+  // Tabs
+  html += `<div class="expand-tabs">
+    <button class="tab-btn active" onclick="switchTab('cmp',this)">🔀 類義語比較</button>
+    <button class="tab-btn" onclick="switchTab('ex',this)">📝 例文</button>
+  </div>`;
+  // Compare
+  html += `<div class="tab-content show" id="tab-cmp"><div class="compare-box"><h4>🗂 類義語・紛らわしい言葉</h4>`;
+  d.compare.forEach(c => {
+    html += `<div class="cmp-row"><span class="cmp-word">${c.w}</span><span class="cmp-def">${c.def}</span><span class="cmp-ex">${c.ex}</span></div>`;
+  });
+  html += `</div></div>`;
+  // Examples
+  html += `<div class="tab-content" id="tab-ex"><div class="example-box"><h4>📖 例文</h4>`;
+  d.examples.forEach(e => {
+    const parts = e.split('（');
+    html += `<div class="example-item"><span class="jp">${parts[0]}</span>${parts[1] ? '<br><span class="vn">（' + parts[1] + '</span>' : ''}</div>`;
+  });
+  html += `</div></div>`;
+  el.innerHTML = html;
+  el.classList.add('show');
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('show'));
+  btn.classList.add('active');
+  const el = document.getElementById('tab-' + tab);
+  if (el) el.classList.add('show');
+}
+
+document.getElementById('nextBtn').onclick = () => {
+  current++;
+  showQ(current);
+};
+
+function updateProgress(idx) {
+  const pct = (idx / quizData.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${idx} / ${quizData.length}`;
+}
+
+function spawnFireworks(btn) {
+  const rect = btn.getBoundingClientRect();
+  const emojis = ['✨','🌟','⭐','🎉','🌸'];
+  for (let i = 0; i < 5; i++) {
+    const f = document.createElement('div');
+    f.className = 'firework';
+    f.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    f.style.left = (rect.left + Math.random() * rect.width) + 'px';
+    f.style.top = (rect.top + window.scrollY) + 'px';
+    document.body.appendChild(f);
+    setTimeout(() => f.remove(), 900);
+  }
+}
+
+function showResult() {
+  document.getElementById('qCard').style.display = 'none';
+  const rs = document.getElementById('resultScreen');
+  rs.classList.add('show');
+  document.getElementById('resultScore').textContent = score;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = `${quizData.length} / ${quizData.length}`;
+  const pct = score / quizData.length;
+  let rank, msg;
+  if (pct >= 0.9) { rank = '🏆 N3合格レベル！'; msg = 'Xuất sắc! Bạn đã nắm vững từ vựng N3. Có thể thử sức với N2 rồi!'; }
+  else if (pct >= 0.8) { rank = '🥇 素晴らしい！'; msg = 'Rất tốt! Chỉ cần ôn thêm một chút là có thể tự tin thi N3.'; }
+  else if (pct >= 0.7) { rank = '🥈 よく頑張った！'; msg = 'Khá tốt! Hãy xem lại các câu sai, đặc biệt là cặp tự/他動詞.'; }
+  else if (pct >= 0.5) { rank = '🥉 もう少し！'; msg = 'Cần cố gắng thêm! Tập trung vào collocation và cặp từ đồng nghĩa.'; }
+  else { rank = '📚 もっと練習しよう'; msg = 'Đừng nản lòng! Hãy ôn lại từ vựng và làm lại bài quiz này.'; }
+  document.getElementById('resultRank').textContent = rank;
+  document.getElementById('resultMsg').textContent = msg;
+  for (let i = 0; i < 20; i++) {
+    setTimeout(() => {
+      const f = document.createElement('div');
+      f.className = 'firework';
+      f.textContent = ['🌸','✨','🎉','⭐','🏮'][Math.floor(Math.random()*5)];
+      f.style.left = Math.random() * window.innerWidth + 'px';
+      f.style.top = Math.random() * window.innerHeight/2 + window.scrollY + 'px';
+      document.body.appendChild(f);
+      setTimeout(() => f.remove(), 900);
+    }, i * 100);
+  }
+}
+
+function restart() {
+  current = 0; score = 0;
+  document.getElementById('scoreBadge').textContent = '0 ✓';
+  document.getElementById('resultScreen').classList.remove('show');
+  showQ(0);
+}
+
+init();
+</script>
+</body>
+</html>
